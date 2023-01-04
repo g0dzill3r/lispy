@@ -55,6 +55,18 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
 
     companion object {
         val NIL = ExpressionCell (NilValue, NilValue)
+
+        fun fromList (list: List<Expression>) : ExpressionCell {
+            return if (list.isEmpty ()) {
+                NIL
+            } else {
+                var last: Expression = NilValue
+                for (i in list.size - 1 downTo 0) {
+                    last = ExpressionCell (list [i], last)
+                }
+                last as ExpressionCell
+            }
+        }
     }
 }
 

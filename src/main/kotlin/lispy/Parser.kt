@@ -47,15 +47,38 @@ object Parser {
         }
     }
 
+    private inline fun <reified T: Token> expect (iter: PeekableIterator<Token>) {
+        val token = iter.next ()
+        if (token !is T) {
+            throw IllegalStateException ("Expected ${T::class.simpleName} found $token")
+        }
+        return
+    }
+
     private fun parseList (iter: PeekableIterator<Token>): Expression {
-        if (! iter.hasNext ()) {
-            throw IllegalStateException ("Unexpected EOF; expected ')'")
+        val list = mutableListOf<Expression> ()
+
+        while (iter.hasNext ()) {
+            val next = iter.peek ()
+            if (next is Token.RightParen) {
+                iter.next ()
+                return ExpressionCell.fromList (list)
+            }
+
+            if (next is Token.Dot) {
+                if (list.size != 1) {
+                    throw IllegalStateException ("Invalid dot placement; expected 1 prior expresion found ${list.size}")
+                }
+                iter.next ()
+                val cell = ExpressionCell (list[0], parseExpression (iter))
+                expect<Token.RightParen> (iter)
+                return cell
+            }
+
+            list.add (parseExpression (iter))
         }
-        if (iter.peek () is Token.RightParen) {
-            iter.next ()
-            return NilValue
-        }
-        return ExpressionCell (parseExpression (iter), parseList (iter))
+
+        throw IllegalStateException ("Unexpected EOF; expected ')'")
     }
 }
 

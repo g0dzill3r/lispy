@@ -16,17 +16,6 @@ abstract class InvokableSupport (override val symbol: String) : Invokable, Expre
             interp.eval (it)
         }
     }
-    fun fromList (list: List<Expression>) : ExpressionCell {
-        return if (list.isEmpty ()) {
-            ExpressionCell.NIL
-        } else {
-            var last: Expression = NilValue
-            for (i in list.size - 1 downTo 0) {
-                last = ExpressionCell (list [i], last)
-            }
-            last as ExpressionCell
-        }
-    }
 
     fun toList (cell: ExpressionCell, list: MutableList<Expression> = mutableListOf ()): List<Expression> {
         if (cell.car != NilValue) {

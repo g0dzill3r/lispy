@@ -6,7 +6,7 @@ import java.lang.IllegalArgumentException
 class ListOp () : InvokableSupport ("list") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
-        return fromList (eval)
+        return ExpressionCell.fromList (eval)
     }
 }
 
