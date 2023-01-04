@@ -1,4 +1,4 @@
-# Baby Scheme
+# Scheme in Kotlin
 
 The start of a simple scheme interpreter written in Kotlin.
 
