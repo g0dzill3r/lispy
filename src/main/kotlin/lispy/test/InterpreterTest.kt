@@ -17,7 +17,9 @@ fun main () {
         val els: List<Expression> = parser.parseMany (it)
         els.forEach {
             val res = lisp.eval (it)
-            println ("-> $res")
+            if (res != NilValue) {
+                println("-> $res")
+            }
         }
         true
     }
