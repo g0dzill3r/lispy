@@ -95,7 +95,6 @@ object Builtins {
         override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
             println ("CELL - $cell")
             println ("BRACKETS - ${cell.toBrackets()}")
-//            val eval = eval (cell, interp)
             val eval = interp.eval (cell)
             if (eval is ExpressionCell) {
                 println ("EVAL - ${eval.toBrackets()}")

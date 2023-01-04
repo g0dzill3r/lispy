@@ -94,7 +94,6 @@ class Interpreter {
                 when (value) {
                     null -> NilValue
                     is Expression -> value
-//                    is Invokable -> Symbol (value.symbol)
                     else -> StringValue ("${value::class.simpleName}:${value}")
                 }
             }
@@ -112,7 +111,7 @@ class Interpreter {
             throw IllegalStateException ("Unrecognized symbol: ${expr.car}")
         }
         return when (car) {
-            is Invokable -> car.invoke (expr.cdr as ExpressionCell, this)
+            is Invokable -> car.invoke (if (expr.cdr is ExpressionCell) expr.cdr else ExpressionCell.NIL, this) // TODO: This is a hack, fix me.
             else -> throw IllegalStateException ("Expected symbol; found $car")
         }
     }

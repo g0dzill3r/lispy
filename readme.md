@@ -106,3 +106,27 @@ repl> (mapcar (lambda (x) (* x x)) '(1 2 3))
 -> (1 4 9)
 ```
 
+## Utility
+
+```agsl
+repl> ($reset)
+-> true
+repl> ($scope)
+-> nil
+repl> ($env)
+else: true
+$scope: builtin:$scope
+$env: builtin:$env
+$reset: builtin:$reset
+noop: builtin:noop
+dump: builtin:dump
+quote: builtin:quote
+define: builtin:define
+display: builtin:display
+lambda: builtin:lambda
++: builtin:+
+*: builtin:*
+.
+.
+.
+```
