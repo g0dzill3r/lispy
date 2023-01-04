@@ -16,7 +16,6 @@ private val DEBUG = false
 class Interpreter {
     private val env = mutableMapOf<String, Any> ()
     private val scopes = Stack<MutableMap<String, Any>> ()
-    fun put (symbol: Symbol, value: Any, global: Boolean = false) = put (symbol.symbol, value, global)
 
     val environment: Map<String, Any>
         get () = env.toMap ()
@@ -37,6 +36,8 @@ class Interpreter {
             scopes.pop ()
         }
     }
+
+    fun put (symbol: Symbol, value: Any, global: Boolean = false) = put (symbol.symbol, value, global)
 
     fun put (symbol: String, value: Any, global: Boolean = false) {
         if (global) {
@@ -117,18 +118,6 @@ class Interpreter {
         }
     }
 }
-fun main () {
-    val lisp = Interpreter ()
 
-    interpreter ("repl> ") {
-        val exprs = Parser.parseMany (it)
-        exprs.forEach {
-            val res = lisp.eval (it)
-            println ("-> $res")
-        }
-        true
-    }
-    // NOT REACHED
-}
 
 // EOF

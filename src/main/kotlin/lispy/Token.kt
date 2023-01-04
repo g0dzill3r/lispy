@@ -1,5 +1,9 @@
 package lispy
 
+/**
+ * The Token type represents the range of tokens that can be emitted by the lexer.
+ */
+
 sealed class Token (val location: Source.Location) {
     class Integer (val value: Int, loc: Source.Location) : Token (loc) {
         override fun toString() : String = "int:$value"

@@ -59,18 +59,6 @@ object Parser {
     }
 }
 
-fun main () {
-    interpreter ("p> ") {
-        val exprs = Parser.parseMany (it)
-        exprs.forEach {
-            println (it)
-            if (it is ExpressionCell) {
-                println (it.toBrackets())
-            }
-        }
-        true
-    }
-    // NOT REACHED
-}
+
 
 // EOF

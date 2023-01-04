@@ -1,5 +1,9 @@
 package lispy
 
+/**
+ * The expression is the parent type of all scheme data types.
+ */
+
 open class Expression
 class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Expression () {
     val isNil: Boolean

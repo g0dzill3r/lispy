@@ -122,16 +122,6 @@ object Lexer {
 }
 
 
-fun main() {
-    interpreter ("l> ") {
-        val tokens = Lexer.lex (it)
-        tokens.iterator ().forEach {
-            println(it)
-        }
-        true
-    }
 
-    // NOT REACHED
-}
 
 // EOF
