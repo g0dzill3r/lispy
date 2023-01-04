@@ -179,6 +179,17 @@ val MATH_EXTRAS = listOf (
                 1
                 (* n (factorial (- n 1)))))""",
     "(define (zero? x) (= x 0))",
-    "(define (nonzero? x) (not (zero? x)))"
+    "(define (nonzero? x) (not (zero? x)))",
+    """(define (clamp x lo hi)
+            (cond ((< x lo) lo)
+                ((> x hi) hi)
+                (else x)))""",
+    "(define ≤ <=)",
+    "(define ≥ >=)",
+    "(define √ sqrt)",
+    "(define ÷ /)"
+
+//    "(define ≤≥√∑∏∀÷ <=)"
+
 
 )

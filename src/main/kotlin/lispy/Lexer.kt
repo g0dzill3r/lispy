@@ -14,6 +14,10 @@ object Lexer {
                         source.next ()
                         yield (Token.RightParen (source.location))
                     }
+                    '.' -> {
+                        source.next ()
+                        yield (Token.Dot (source.location))
+                    }
                     '\'' -> {
                         source.next () 
                         yield (Token.Quote (source.location))
@@ -33,6 +37,11 @@ object Lexer {
         }
     }
 
+    private val NUMERIC_VALID_CHARS = buildMap<Boolean, String> {
+        put (false, "0123456789.")
+        put (true, "0123456789")
+    }
+
     private fun readNumeric (source: Source): Token {
         val buf = StringBuffer ()
         buf.append (source.next ())
@@ -40,25 +49,12 @@ object Lexer {
 
         while (source.hasNext ()) {
             val next = source.peek ()
-            when (next) {
-                '.' -> {
-                    if (isFloat) {
-                        throw IllegalStateException ("Unexpected token: $next at ${source.location}")
-                    } else {
-                        isFloat = true
-                        buf.append (source.next ())
-                    }
-                }
-                in '0' .. '9' -> {
-                    buf.append (source.next ())
-                }
-                ')', '(',
-                ' ', '\t', '\n' -> {
-                    break
-                }
-                else -> {
-                    throw IllegalStateException ("Unexpected token: $next at ${source.location}")
-                }
+            if (! NUMERIC_VALID_CHARS[isFloat]!!.contains (next)) {
+                break
+            }
+            buf.append (source.next ())
+            if (next == '.') {
+                isFloat = true
             }
         }
 
@@ -69,7 +65,6 @@ object Lexer {
         }
     }
 
-    private val SYMBOL_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!@#$%^&*()-_=+{}|[]:;?"
 
     private fun readString (source: Source): Token {
         val buf = StringBuffer ()
@@ -91,24 +86,18 @@ object Lexer {
         return Token.QuotedString (buf.toString (), source.location)
     }
 
+    private val SYMBOL_VALID_CHARS = "(). \t\n"
+
     private fun readSymbol (source: Source): Token {
         val buf = StringBuffer ()
         buf.append (source.next ())
 
         while (source.hasNext ()) {
             val next = source.peek ()
-            when (next) {
-                '(', ')', ' ', '\t', '\n' -> {
-                    break
-                }
-                else -> {
-                    if (SYMBOL_CHARS.indexOf (next) != -1) {
-                        buf.append (source.next ())
-                    } else {
-                        throw IllegalStateException ("Unrecognized token: $next at ${source.location}")
-                    }
-                }
+            if (SYMBOL_VALID_CHARS.contains (next)) {
+                break
             }
+            buf.append (source.next ())
         }
 
         val symbol = buf.toString ()
