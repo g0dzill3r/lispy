@@ -1,0 +1,38 @@
+cond
+if
+
+(float x)
+(int x)
+(string x)
+(format x)
+
+sin
+cos
+tan
+
+
+
+(define (square x) (* x x))
+(define (sum-of-squares x y) (+ (square x) (square y)))
+
+(define (abs x) (cond ((> x 0) x) ((= x 0) 0) ((< x 0) (- x))))
+(define (abs x) (cond ((< x 0) (- x)) (else x)))
+(define (abs x) (if (< x 0) (- x) x))
+
+
+BROKEN
+
+(define (abs x) ((if (< x 0) - +) x))
+(abs (- 1))
+
+
+
+
+
+
+(define (mapcar l x) (cons (l (car x)) (mapcar (l (cdr x)))))
+(define a '(1 2 3 4 5))
+(mapcar (lambda (x) (* x 2)) a)
+
+(define (mapcar f L) (if (null? L) '() (cons (f (car L)) (mapcar f (cdr L)))))
+(mapcar (lambda (x) (+ 1000 (* x 5))) '(1 2 3 4))
