@@ -18,3 +18,5 @@ tan
 (define (abs x) (if (< x 0) (- x) x))
 
 
+(define (reverse x) (_reverse x '()))
+(define (_reverse a b) (if (null? a) b (_reverse (cdr a) (cons (car a) b))))
