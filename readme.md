@@ -54,9 +54,9 @@ repl> (define radius 3)
 -> nil
 repl> (define pi 3.14159)
 -> nil
-repl> (define circumfirance (* pi (* radius radius)))
+repl> (define circumference (* pi (* radius radius)))
 -> nil
-repl> circumfirance
+repl> circumference
 -> 28.274311
 ```
 
