@@ -1,6 +1,8 @@
-# Baby Scheme
+# Scheme in Kotlin
 
-The start of a simple scheme interpreter written in Kotlin.
+A simple scheme interpreter written in Kotlin.
+
+See https://web.mit.edu/6.001/6.037/sicp.pdf 
 
 ## Working with lists
 
@@ -54,9 +56,9 @@ repl> (define radius 3)
 -> nil
 repl> (define pi 3.14159)
 -> nil
-repl> (define circumfirance (* pi (* radius radius)))
+repl> (define circumference (* pi (* radius radius)))
 -> nil
-repl> circumfirance
+repl> circumference
 -> 28.274311
 ```
 
