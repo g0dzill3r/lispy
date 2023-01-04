@@ -1,6 +1,6 @@
 # Scheme in Kotlin
 
-The start of a simple scheme interpreter written in Kotlin.
+A simple scheme interpreter written in Kotlin.
 
 ## Working with lists
 
