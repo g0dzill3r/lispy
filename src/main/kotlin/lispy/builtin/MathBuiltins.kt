@@ -184,12 +184,11 @@ val MATH_EXTRAS = listOf (
             (cond ((< x lo) lo)
                 ((> x hi) hi)
                 (else x)))""",
+    // Aliases using unicode characters
     "(define ≤ <=)",
     "(define ≥ >=)",
     "(define √ sqrt)",
-    "(define ÷ /)"
-
-//    "(define ≤≥√∑∏∀÷ <=)"
-
-
+    "(define ÷ /)",
+    "(define (∑ L) (fold-right + 0 L))",
+    "(define (∏ L) (fold-right * 1 L))"
 )

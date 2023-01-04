@@ -17,6 +17,14 @@ abstract class InvokableSupport (override val symbol: String) : Invokable, Expre
         }
     }
 
+    fun expect (cell: ExpressionCell, count: Int): List<Expression> {
+        val list = toList (cell)
+        if (list.size != count) {
+            throw IllegalArgumentException ("Expected $count arguments; found ${list.size}")
+        }
+        return list
+    }
+
     fun toList (cell: ExpressionCell, list: MutableList<Expression> = mutableListOf ()): List<Expression> {
         if (cell.car != NilValue) {
             list.add (cell.car)

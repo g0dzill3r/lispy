@@ -6,7 +6,7 @@ import lispy.*
 object Builtins {
     val ALL = listOf (
         ScopeOp (), EnvOp (), ResetOp (),
-        NoopOp (), DumpOp (), QuoteOp (), DefineOp (), DisplayOp (), LambdaOp (),
+        NoopOp (), DumpOp (), QuoteOp (), DefineOp (), DisplayOp (), LambdaOp (), NewlineOp (),
         AddOp (), MultOp (), SubtractOp (), DivideOp (), ModulusOp (),
         EqualsOp (), LessThanOp (), GreaterThanOp (),
         ListOp (), CarOp (), CdrOp (), ConsOp (), NullOp (),
@@ -27,10 +27,18 @@ object Builtins {
         override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
             val list = evalList (cell, interp)
             if (list.size == 1) {
-                println (list[0])
+                print (list[0])
             } else {
-                println (list)
+                print (list)
             }
+            return NilValue
+        }
+    }
+
+    class NewlineOp : InvokableSupport ("newline") {
+        override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+            val list = expect (cell, 0)
+            println ()
             return NilValue
         }
     }

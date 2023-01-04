@@ -1,21 +1,23 @@
-package lispy
+package lispy.internal
+
+import lispy.*
 
 /**
  * Implements a handwritten parser for scheme source files.
  */
 
-object Parser {
-    fun parseMany (input: String): List<Expression> {
+class InternalParser (val lexer: Lexer) : Parser {
+    override fun parseMany (input: String): List<Expression> {
         return buildList {
-            val iter = Lexer.lex (input).iterator().peekable()
+            val iter = lexer.lex(input).iterator().peekable()
             while (iter.hasNext ()) {
                 val expr = parseExpression (iter)
                 add (expr)
             }
         }
     }
-    fun parse (input: String): Expression {
-        val iter = Lexer.lex (input).iterator().peekable()
+    override fun parse (input: String): Expression {
+        val iter = lexer.lex(input).iterator().peekable()
         val expr = parseExpression (iter)
         if (iter.hasNext ()) {
             val next = iter.next ()
@@ -66,7 +68,7 @@ object Parser {
             val next = iter.peek ()
             if (next is Token.RightParen) {
                 iter.next ()
-                return ExpressionCell.fromList (list)
+                return ExpressionCell.fromList(list)
             }
 
             // Handle the special case of the dotted cell notation (e.g., ( 1 . 2)).

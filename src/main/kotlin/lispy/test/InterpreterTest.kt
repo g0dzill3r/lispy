@@ -1,19 +1,21 @@
 package lispy.test
 
-import lispy.Interpreter
-import lispy.Parser
-import lispy.interpreter
+import lispy.*
 
 /**
  * An interactive REPL for interacting with the interpreter.
  */
 
 fun main () {
-    val lisp = Interpreter ()
+//    val type = ProviderType.LIXY
+//    val provider = ProviderFactory.getProvider (type)
+    val provider = ProviderFactory.getProvider()
+    val parser = provider.parser
+    val lisp = Interpreter (provider)
 
     interpreter ("repl> ") {
-        val exprs = Parser.parseMany (it)
-        exprs.forEach {
+        val els: List<Expression> = parser.parseMany (it)
+        els.forEach {
             val res = lisp.eval (it)
             println ("-> $res")
         }

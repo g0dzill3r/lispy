@@ -1,30 +1,33 @@
-package lispy
+package lispy.internal
+
+import lispy.Lexer
+import lispy.Token
 
 /**
  * Implements a handwritten lexer for tokenizing scheme source files.
  */
 
-object Lexer {
-    fun lex (input: String) : Sequence<Token> {
+class InternalLexer : Lexer {
+    override fun lex (input: String) : Sequence<Token> {
         return sequence {
             val source = Source (input)
             while (source.hasNext ()) {
                 when (source.peek ()) {
                     '(' -> {
                         source.next ()
-                        yield (Token.LeftParen (source.location))
+                        yield (Token.LeftParen(source.location))
                     }
                     ')' -> {
                         source.next ()
-                        yield (Token.RightParen (source.location))
+                        yield (Token.RightParen(source.location))
                     }
                     '.' -> {
                         source.next ()
-                        yield (Token.Dot (source.location))
+                        yield (Token.Dot(source.location))
                     }
                     '\'' -> {
                         source.next () 
-                        yield (Token.Quote (source.location))
+                        yield (Token.Quote(source.location))
                     }
                     ' ', '\n', '\t' -> source.next ()
                     in '0' .. '9' -> {
@@ -63,12 +66,11 @@ object Lexer {
         }
 
         return if (isFloat) {
-            Token.Float (buf.toString ().toFloat (), source.location)
+            Token.Float(buf.toString().toFloat(), source.location)
         } else {
-            Token.Integer (buf.toString ().toInt (), source.location)
+            Token.Integer(buf.toString().toInt(), source.location)
         }
     }
-
 
     private fun readString (source: Source): Token {
         val buf = StringBuffer ()
@@ -87,10 +89,10 @@ object Lexer {
             throw IllegalStateException ("Unterminated quoted string at ${source.location}")
         }
 
-        return Token.QuotedString (buf.toString (), source.location)
+        return Token.QuotedString(buf.toString(), source.location)
     }
 
-    private const val SYMBOL_INVALID_CHARS = "(). \t\n"
+    private val SYMBOL_INVALID_CHARS = "(). \t\n"
 
     private fun readSymbol (source: Source): Token {
         val buf = StringBuffer ()
@@ -106,15 +108,12 @@ object Lexer {
 
         val symbol = buf.toString ()
         return when (symbol) {
-            "nil" -> Token.Nil (source.location)
-            "#t" -> Token.Bool (true, source.location)
-            "#f" -> Token.Bool (false, source.location)
-            else -> Token.Symbol (symbol, source.location)
+            "nil" -> Token.Nil(source.location)
+            "#t" -> Token.Bool(true, source.location)
+            "#f" -> Token.Bool(false, source.location)
+            else -> Token.Symbol(symbol, source.location)
         }
     }
 }
-
-
-
 
 // EOF

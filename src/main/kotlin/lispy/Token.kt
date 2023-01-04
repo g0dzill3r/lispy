@@ -1,5 +1,7 @@
 package lispy
 
+import lispy.internal.Source
+
 /**
  * The Token type represents the range of tokens that can be emitted by the lexer.
  */

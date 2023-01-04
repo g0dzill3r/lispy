@@ -1,9 +1,6 @@
 package lispy.test
 
-import lispy.Expression
-import lispy.ExpressionCell
-import lispy.IntValue
-import lispy.NilValue
+import lispy.*
 
 private val make = { e1: Expression, e2: Expression -> ExpressionCell (e1, e2) }
 
@@ -27,6 +24,28 @@ fun main() {
 
     val c = make (a, make (a, make (a, NilValue)))
     show (c)
+
+    run {
+        val a = ExpressionCell(StringValue("a"), StringValue("b"))
+        println(a)
+        println(a.toBrackets())
+
+        val b = ExpressionCell(IntValue(1), ExpressionCell(IntValue(2)))
+        println(b)
+        println(b.toBrackets())
+
+        val c = ExpressionCell(IntValue(1), ExpressionCell(IntValue(2), ExpressionCell(IntValue(3))))
+        println(c)
+        println(c.toBrackets())
+
+        val d = ExpressionCell(ExpressionCell(IntValue(1), ExpressionCell(IntValue(2))), IntValue(3))
+        println(d)
+        println(d.toBrackets())
+
+        val e = ExpressionCell(ExpressionCell(IntValue(1), ExpressionCell(IntValue(2))))
+        println(e)
+        println(e.toBrackets())
+    }
 
     return
 }

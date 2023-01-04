@@ -1,6 +1,6 @@
 package lispy.test
 
-import lispy.Source
+import lispy.internal.Source
 
 fun main () {
     val source = Source ("""

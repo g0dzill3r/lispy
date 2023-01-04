@@ -1,6 +1,6 @@
 package lispy.test
 
-import lispy.Lexer
+import lispy.ProviderFactory
 import lispy.interpreter
 
 /**
@@ -8,8 +8,13 @@ import lispy.interpreter
  */
 
 fun main() {
-    interpreter ("l> ") {
-        val tokens = Lexer.lex (it)
+//    val type = ProviderType.LIXY
+//    val provider = ProviderFactory.getProvider(type)
+    val provider = ProviderFactory.getProvider()
+    val lexer = provider.lexer
+
+    interpreter ("lex[${provider.type.name}]> ") {
+        val tokens = lexer.lex (it)
         tokens.iterator ().forEach {
             println(it)
         }

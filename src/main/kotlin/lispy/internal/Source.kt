@@ -1,4 +1,4 @@
-package lispy
+package lispy.internal
 
 /**
  * An extended-features iterator for moving through a source-file or source-stream.

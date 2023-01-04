@@ -98,26 +98,4 @@ data class Symbol (val symbol: String) : Expression () {
     override fun toString (): String = symbol
 }
 
-
-fun main() {
-    val a = ExpressionCell (StringValue ("a"), StringValue ("b"))
-    println (a)
-    println (a.toBrackets())
-
-    val b = ExpressionCell (IntValue (1), ExpressionCell (IntValue (2)))
-    println (b)
-    println (b.toBrackets())
-
-    val c = ExpressionCell (IntValue (1), ExpressionCell (IntValue (2), ExpressionCell (IntValue (3))))
-    println (c)
-    println (c.toBrackets())
-
-    val d = ExpressionCell (ExpressionCell (IntValue (1), ExpressionCell (IntValue (2))), IntValue (3))
-    println (d)
-    println (d.toBrackets ())
-
-    val e = ExpressionCell (ExpressionCell (IntValue (1), ExpressionCell (IntValue (2))))
-    println (e)
-    println (e.toBrackets ())
-    return
-}
+// EOF

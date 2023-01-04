@@ -1,5 +1,6 @@
 package lispy
 
+import lispy.Provider
 import lispy.builtin.Builtins
 import lispy.builtin.Invokable
 import java.util.*
@@ -13,7 +14,7 @@ private val DEBUG = false
  * Online interpreter at: https://inst.eecs.berkeley.edu/~cs61a/fa14/assets/interpreter/scheme.html
  * Lisp interpreter here: http://nhiro.org/learn_language/LISP-on-browser.html
  */
-class Interpreter {
+class Interpreter (val provider: Provider) {
     private val env = mutableMapOf<String, Any> ()
     private val scopes = Stack<MutableMap<String, Any>> ()
 
@@ -83,7 +84,7 @@ class Interpreter {
         }
     }
 
-    fun eval (string: String): Any = eval (Parser.parse (string))
+    fun eval (string: String): Any = eval (provider.parser.parse (string))
 
     fun eval (expr: Expression): Expression {
         if (DEBUG) {
