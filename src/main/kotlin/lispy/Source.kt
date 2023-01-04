@@ -1,7 +1,7 @@
 package lispy
 
 /**
- *
+ * An extended-features iterator for moving through a source-file or source-stream.
  */
 
 class Source (iter: Iterator<Char>, val file: String = "input"): Iterator<Char> {

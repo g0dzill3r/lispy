@@ -26,9 +26,9 @@ sealed class Token (val location: Source.Location) {
         override fun toString (): String = "nil"
     }
 
-//    class Dot (loc: Source.Location) : Token (loc) {
-//        override fun toString (): String = "dot"
-//    }
+    class Dot (loc: Source.Location) : Token (loc) {
+        override fun toString (): String = "dot"
+    }
 
     class Quote (loc: Source.Location): Token (loc) {
         override fun toString(): String = "Quote"

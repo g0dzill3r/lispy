@@ -1,7 +1,0 @@
-package lispy
-
-fun main() {
-
-}
-
-

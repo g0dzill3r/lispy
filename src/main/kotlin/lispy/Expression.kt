@@ -8,14 +8,9 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
     fun toBrackets (): String {
         return StringBuffer ().apply {
             if (car is NilValue) {
-                append ("[")
-                append (car)
-                append (".")
-                append (cdr)
-                append ("]")
+                append ("[$car.$cdr]")
             } else {
-                append ("[")
-                append (car)
+                append ("[$car")
                 if (cdr !is NilValue) {
                     append (", ")
                     if (cdr is ExpressionCell) {

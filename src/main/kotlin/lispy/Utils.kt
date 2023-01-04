@@ -12,7 +12,6 @@ fun interpreter (prompt: String = "> ", func: (String) -> Boolean) {
             }
         }
         catch (e: Exception) {
-//            println ("ERROR: ${e.message}")
             e.printStackTrace()
         }
     }
@@ -31,6 +30,7 @@ fun <T, S> Stack<T>.push (t: T, func: () -> S): S {
 }
 
 fun <T> Iterator<T>.peekable () : PeekableIterator<T> = PeekableIterator<T> (this)
+
 class PeekableIterator<T> (val wrapped: Iterator<T>): Iterator<T> {
     private var saved: T? = null;
 
