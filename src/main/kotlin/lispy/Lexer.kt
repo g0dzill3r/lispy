@@ -1,5 +1,9 @@
 package lispy
 
+/**
+ * Implements a handwritten lexer for tokenizing scheme source files.
+ */
+
 object Lexer {
     fun lex (input: String) : Sequence<Token> {
         return sequence {
@@ -86,7 +90,7 @@ object Lexer {
         return Token.QuotedString (buf.toString (), source.location)
     }
 
-    private val SYMBOL_VALID_CHARS = "(). \t\n"
+    private const val SYMBOL_INVALID_CHARS = "(). \t\n"
 
     private fun readSymbol (source: Source): Token {
         val buf = StringBuffer ()
@@ -94,7 +98,7 @@ object Lexer {
 
         while (source.hasNext ()) {
             val next = source.peek ()
-            if (SYMBOL_VALID_CHARS.contains (next)) {
+            if (SYMBOL_INVALID_CHARS.contains (next)) {
                 break
             }
             buf.append (source.next ())

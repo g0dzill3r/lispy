@@ -1,5 +1,9 @@
 package lispy
 
+/**
+ * Implements a handwritten parser for scheme source files.
+ */
+
 object Parser {
     fun parseMany (input: String): List<Expression> {
         return buildList {
@@ -65,6 +69,8 @@ object Parser {
                 return ExpressionCell.fromList (list)
             }
 
+            // Handle the special case of the dotted cell notation (e.g., ( 1 . 2)).
+
             if (next is Token.Dot) {
                 if (list.size != 1) {
                     throw IllegalStateException ("Invalid dot placement; expected 1 prior expresion found ${list.size}")
@@ -81,7 +87,5 @@ object Parser {
         throw IllegalStateException ("Unexpected EOF; expected ')'")
     }
 }
-
-
 
 // EOF

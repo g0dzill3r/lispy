@@ -37,6 +37,23 @@ sealed class Token (val location: Source.Location) {
     class Quote (loc: Source.Location): Token (loc) {
         override fun toString(): String = "Quote"
     }
+
+    companion object {
+        fun render (token: Token) : String{
+            return when (token) {
+                is LeftParen -> "("
+                is RightParen -> ")"
+                is Dot -> "."
+                is Nil -> "nil"
+                is Bool -> if (token.value) "#t" else "#f"
+                is Symbol -> token.symbol
+                is QuotedString -> "\"${token.string}\""
+                is Integer -> "${token.value}"
+                is Float -> "${token.value}"
+                is Quote -> "\'"
+            }
+        }
+    }
 }
 
 // EOF

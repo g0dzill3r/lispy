@@ -9,3 +9,11 @@ cos
 tan
 
 
+
+
+
+
+(define (x) (if (null? seq) init (f (car seq) (fold-right f init (cdr seq)))))
+
+
+

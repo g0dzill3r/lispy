@@ -66,7 +66,18 @@ val LIST_EXTRAS = listOf (
     "(define (cadddr x) (car (cdr (cdr (cdr x)))))",
     "(define (mapcar f L) (if (null? L) '() (cons (f (car L)) (mapcar f (cdr L)))))",
     "(define (reverse x) (_reverse x '()))",
-    "(define (_reverse a b) (if (null? a) b (_reverse (cdr a) (cons (car a) b))))"
+    "(define (_reverse a b) (if (null? a) b (_reverse (cdr a) (cons (car a) b))))",
+    """(define (fold-right f init seq)
+           (if (null? seq)
+               init
+               (f (car seq)
+                  (fold-right f init (cdr seq)))))""",
+    """(define (fold-left f init seq)
+           (if (null? seq)
+               init
+               (fold-left f
+                          (f init (car seq))
+                          (cdr seq))))"""
 )
 
 // EOF
