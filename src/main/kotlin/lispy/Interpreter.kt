@@ -11,6 +11,7 @@ private val DEBUG = false
  *
  * Book at: https://web.mit.edu/6.001/6.037/sicp.pdf
  * Online interpreter at: https://inst.eecs.berkeley.edu/~cs61a/fa14/assets/interpreter/scheme.html
+ * Lisp interpreter here: http://nhiro.org/learn_language/LISP-on-browser.html
  */
 class Interpreter {
     private val env = mutableMapOf<String, Any> ()
@@ -120,8 +121,11 @@ fun main () {
     val lisp = Interpreter ()
 
     interpreter ("repl> ") {
-        val res = lisp.eval (it)
-        println ("-> $res")
+        val exprs = Parser.parseMany (it)
+        exprs.forEach {
+            val res = lisp.eval (it)
+            println ("-> $res")
+        }
         true
     }
     // NOT REACHED
