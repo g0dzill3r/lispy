@@ -38,7 +38,7 @@ fun <T, S> Stack<T>.push (t: T, func: () -> S): S {
 
 
 /**
- * A wrapper for the Iterator<T> that allows for single look-ahead. 
+ * A wrapper for the Iterator<T> that allows for single look-ahead.
  */
 fun <T> Iterator<T>.peekable () : PeekableIterator<T> = PeekableIterator<T> (this)
 
