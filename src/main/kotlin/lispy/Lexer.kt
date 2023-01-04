@@ -69,7 +69,7 @@ object Lexer {
         }
     }
 
-    private val SYMBOL_CHARS = "abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!@#$%^&*()-_=+{}|[]:;?"
+    private val SYMBOL_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!@#$%^&*()-_=+{}|[]:;?"
 
     private fun readString (source: Source): Token {
         val buf = StringBuffer ()

@@ -2,6 +2,9 @@ package lispy.builtin
 
 import lispy.*
 
+/**
+ * Data structure for storing non-builtin functions (bound and lambdas).
+ */
 class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expression) : InvokableSupport (symbol) {
     private val argList = buildList {
         toList(args).map {
@@ -33,6 +36,15 @@ class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expre
     }
 }
 
+/**
+ * The builtin operation for defining a lambda function.
+ *
+ *  repl> (define example (lambda (x) (* x x)))
+ *  -> nil
+ *  repl> (example 3)
+ *  -> 9
+ */
+
 class LambdaOp : InvokableSupport ("lambda") {
     override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
         val list = toList (cell)
@@ -48,7 +60,13 @@ class LambdaOp : InvokableSupport ("lambda") {
 
 /**
  * The builtin operation for defining a new value or function.
+ *
+ *  repl> (define (square x) (* x x))
+ *  -> nil
+ *  repl> (square 3)
+ *  -> 9
  */
+
 class DefineOp : InvokableSupport ("define") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
         val list = toList (cell)
