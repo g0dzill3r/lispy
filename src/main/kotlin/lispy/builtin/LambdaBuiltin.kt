@@ -2,6 +2,8 @@ package lispy.builtin
 
 import lispy.*
 
+data class ActivationRecord (val symbol: String, val params: ExpressionCell, var operands: ExpressionCell, val lambda: Expression)
+
 /**
  * Data structure for storing non-builtin functions (bound and lambdas).
  */
@@ -28,10 +30,7 @@ class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expre
         val map = mutableMapOf<String, Any> ()
         params.forEachIndexed { i, value ->
             map.put (argList[i], value)
-            map.put (PROCEDURE, symbol)
-            map.put (FORMAL_PARAMETERS, args)
-            map.put (OPERANDS, params)
-            map.put (EXPRESSION, lambda)
+            map.put ("_", ActivationRecord (symbol, args, ExpressionCell.fromList (params), lambda))
         }
 
         return interp.scoped (map) {
