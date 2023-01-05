@@ -176,6 +176,8 @@ val MATH_EXTRAS = listOf (
     "(define (zero? x) (= x 0))",
     "(define (abs x) ((if (< x 0) - +) x))",
     "(define (nonzero? x) (not (zero? x)))",
+    "(define (average x y) (/ (+ x y) 2))",
+    "(define (average-list L) (/ (sum L) (length L)))",
     """(define (clamp x lo hi)
             (cond ((< x lo) lo)
                 ((> x hi) hi)
@@ -185,6 +187,7 @@ val MATH_EXTRAS = listOf (
     "(define ≥ >=)",
     "(define √ sqrt)",
     "(define ÷ /)",
-    "(define (∑ L) (fold-right + 0 L))",
+    "(define (sum L) (fold-right + 0 L))",
+    "(define ∑ sum)",
     "(define (∏ L) (fold-right * 1 L))"
 )

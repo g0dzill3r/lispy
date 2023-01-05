@@ -1,11 +1,18 @@
 package lispy.test
 
 import lispy.Interpreter
-import lispy.NilValue
 import lispy.ProviderFactory
 
 fun main() {
-    println ("Enter a blank line for force evaluation")
+    fun usage () {
+        println ("""
+                        p - print buffer
+                        d - delete last line
+                        c - clear buffer
+                        e - execute buffer (or blank line)
+                        ? - show these commands
+                    """.trimIndent())
+    }
 
     val provider = ProviderFactory.getProvider()
     val interp = Interpreter (provider)
@@ -28,16 +35,12 @@ fun main() {
                 val isValid = isValid (buf.toString ())
                 print ("$count${if (isValid) ")" else "("} ")
                 val s = readln()
-                if (s == "" || s == "e") {
+                if (s == "") {
+                    // IGNORED
+                } else if (s == "e") {
                     break
                 } else if (s == "?") {
-                    println ("""
-                        p - print buffer
-                        d - delete last line
-                        c - clear buffer
-                        e - execute buffer
-                        ? - show these commands
-                    """.trimIndent())
+                    usage ()
                 } else if (s == "p") {
                     val str = buf.toString ()
                     if (str.isNotEmpty()) {
@@ -51,6 +54,9 @@ fun main() {
                 } else {
                     buf.append(s)
                     buf.append ("\n")
+                    if (isValid (buf.toString ())) {
+                        break
+                    }
                 }
             }
             val expr = buf.toString ()
