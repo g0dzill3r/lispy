@@ -14,12 +14,10 @@ fun main () {
     val lisp = Interpreter (provider)
 
     interpreter ("repl> ") {
-        val els: List<Expression> = parser.parseMany (it)
-        els.forEach {
-            val res = lisp.eval (it)
+        lisp.eval (it).forEach { res ->
             when (res) {
                 is NilValue -> Unit
-                is StringValue -> println ("-> \"${res}\"")
+                is StringValue -> println("-> \"${res}\"")
                 else -> println("-> $res")
             }
         }

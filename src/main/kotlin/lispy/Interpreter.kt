@@ -55,13 +55,9 @@ class Interpreter (val provider: Provider) {
      * Evaluate some number of expressions in a string
      */
 
-    fun eval (string: String): Expression {
+    fun eval (string: String): List<Expression> {
         val els = provider.parser.parseMany (string)
-        var result: Expression = NilValue
-        els.forEach {
-            result = eval (it)
-        }
-        return result
+        return els.map { eval (it) }
     }
 
     /**

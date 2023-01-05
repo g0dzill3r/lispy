@@ -32,8 +32,6 @@ fun main() {
             val buf = StringBuffer ()
             while (true) {
                 val count = buf.count { it == '\n' }
-//                val isValid = isValid (buf.toString ())
-//                print ("$count${if (isValid) ")" else "("} ")
                 print ("$count: ")
                 val s = readln()
                 if (s == "") {
@@ -62,10 +60,8 @@ fun main() {
             }
             val expr = buf.toString ()
             if (expr.isNotEmpty ()) {
-                val result = interp.eval(buf.toString())
-//                if (result != NilValue) {
-                    println("-> $result")
-//                }
+                val results = interp.eval(buf.toString())
+                println (results.map { "-> $it" }.joinToString ("\n"))
             }
         }
     }
