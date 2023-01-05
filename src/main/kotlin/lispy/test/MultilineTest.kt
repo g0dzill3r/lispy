@@ -26,7 +26,7 @@ fun main() {
             while (true) {
                 val count = buf.count { it == '\n' }
                 val isValid = isValid (buf.toString ())
-                print ("$count${if (isValid) "." else ":"} ")
+                print ("$count${if (isValid) ")" else "("} ")
                 val s = readln()
                 if (s == "" || s == "e") {
                     break
@@ -36,6 +36,7 @@ fun main() {
                         d - delete last line
                         c - clear buffer
                         e - execute buffer
+                        ? - show these commands
                     """.trimIndent())
                 } else if (s == "p") {
                     val str = buf.toString ()

@@ -24,3 +24,9 @@ tan
 (define (average x y) (/ (+ x y) 2))
 (define (good-enough? guess x) (< (abs (- (square guess) x)) 0.001))
 (sqrt-iter 16)
+
+
+0. (define (sum x)
+1:   (define (sum-iter x acc) (if (= x 0) acc (sum-iter (- x 1) (+ acc x))))
+2:   (sum-iter x 0)
+3: )
