@@ -32,8 +32,9 @@ fun main() {
             val buf = StringBuffer ()
             while (true) {
                 val count = buf.count { it == '\n' }
-                val isValid = isValid (buf.toString ())
-                print ("$count${if (isValid) ")" else "("} ")
+//                val isValid = isValid (buf.toString ())
+//                print ("$count${if (isValid) ")" else "("} ")
+                print ("$count: ")
                 val s = readln()
                 if (s == "") {
                     // IGNORED
