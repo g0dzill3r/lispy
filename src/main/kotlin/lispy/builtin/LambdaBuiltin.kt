@@ -47,14 +47,14 @@ class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expre
 
 class LambdaOp : InvokableSupport ("lambda") {
     override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = toList (cell)
-        if (list.size != 2) {
-            throw IllegalStateException ("Invalid argument count: ${list.size}")
+        val args = cell.car as ExpressionCell
+        val procs = cell.cdr as ExpressionCell
+        val begin = when (procs.length) {
+            0 -> throw IllegalStateException ("Expected 1 or expressions, found 0")
+            1 -> procs.car
+            else -> ExpressionCell (Symbol ("begin"), procs)
         }
-
-        val args = requireExpressionCell (list[0])
-        val rval = list[1]
-        return BoundFunction ("lambda", args, rval)
+        return BoundFunction ("lambda", args, begin)
     }
 }
 
@@ -69,32 +69,49 @@ class LambdaOp : InvokableSupport ("lambda") {
 
 class DefineOp : InvokableSupport ("define") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = toList (cell)
-        if (list.size != 2) {
-            throw IllegalStateException ("Invalid argument count: ${list.size}")
-        }
+        val type = cell.car
 
-        // See if we're defining a function or just a symbol with a value
+        when (type) {
+            is ExpressionCell -> {
+                val symbol = requireSymbol (type.car)
+                val args = if (type.cdr == NilValue) ExpressionCell.NIL else requireExpressionCell(type.cdr)
+                val procs = cell.cdr as ExpressionCell
+                val begin = when (procs.length) {
+                    0 -> throw IllegalStateException ("Expected 1 or expressions, found 0")
+                    1 -> procs.car
+                    else -> ExpressionCell (Symbol ("begin"), procs)
+                }
 
-        val lval = list [0]
-
-        if (lval is Symbol) {
-            val rval = interp.eval (list [1])
-            interp.put (lval, rval, true)
-        } else if (lval is ExpressionCell) {
-            val variable = requireSymbol (lval.car)
-            val args = lval.cdr
-            toList (args as ExpressionCell).forEach {
-                requireSymbol (it)
+                val bound = BoundFunction (symbol.symbol, args, begin)
+                interp.put (symbol, bound, true)
             }
-            val rval = list [1]
-            val bound = BoundFunction (variable.symbol, args, rval)
-            interp.put (variable, bound, true)
-        } else {
-            throw IllegalStateException ("Invalid lval type: ${lval::class.simpleName}")
+            is Symbol -> {
+                val list = toList (cell)
+                if (list.size != 2) {
+                    throw IllegalStateException ("Invalid argument count: ${list.size}")
+                }
+                val rval = interp.eval (list [1])
+                interp.put (type, rval, true)
+            }
+            else -> throw IllegalStateException ("Invalid lval type: ${type::class.simpleName}")
         }
 
         return NilValue
+    }
+}
+
+/**
+ * The begin operation which allows a set of expressions to comprise the body of a procedure.
+ */
+
+class BeginOp : InvokableSupport ("begin") {
+    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+        val eval = evalList (cell, interp)
+        return if (eval.isEmpty()) {
+            NilValue
+        } else {
+            eval.last ()
+        }
     }
 }
 

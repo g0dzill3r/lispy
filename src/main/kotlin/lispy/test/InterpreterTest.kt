@@ -17,8 +17,10 @@ fun main () {
         val els: List<Expression> = parser.parseMany (it)
         els.forEach {
             val res = lisp.eval (it)
-            if (res != NilValue) {
-                println("-> $res")
+            when (res) {
+                is NilValue -> Unit
+                is StringValue -> println ("-> \"${res}\"")
+                else -> println("-> $res")
             }
         }
         true

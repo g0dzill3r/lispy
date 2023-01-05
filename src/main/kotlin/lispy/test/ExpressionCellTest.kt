@@ -47,6 +47,17 @@ fun main() {
         println(e.toBrackets())
     }
 
+    run {
+        val e1 = ExpressionCell.NIL
+        println ("$e1: ${e1.length}")
+
+        val e2 = ExpressionCell (Symbol ("a"))
+        println ("$e2: ${e2.length}")
+
+        val e3 = ExpressionCell (Symbol ("b"), e2)
+        println ("$e3: ${e3.length}")
+    }
+
     return
 }
 

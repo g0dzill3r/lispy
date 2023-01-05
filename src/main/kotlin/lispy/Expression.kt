@@ -9,6 +9,20 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
     val isNil: Boolean
         get () = car == NilValue && cdr == NilValue
 
+    val length: Int
+        get () {
+            if (car == NilValue) {
+                return 0
+            }
+            var total = 1
+            var ptr = this
+            while (ptr.cdr is ExpressionCell) {
+                total ++
+                ptr = ptr.cdr as ExpressionCell
+            }
+            return total
+        }
+
     fun toBrackets (): String {
         return StringBuffer ().apply {
             if (car is NilValue) {
@@ -81,7 +95,7 @@ data class FloatValue (val value: Float) : Value () {
     override fun toString (): String = "$value"
 }
 data class StringValue (val value: String): Value () {
-    override fun toString (): String = "\"$value\""
+    override fun toString (): String = value
 }
 data class BooleanValue (val value: Boolean): Value () {
     override fun toString (): String = "$value"

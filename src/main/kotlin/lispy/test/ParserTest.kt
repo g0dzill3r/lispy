@@ -2,7 +2,7 @@ package lispy.test
 
 import lispy.ExpressionCell
 import lispy.ProviderFactory
-import lispy.ProviderType
+import lispy.Provider
 import lispy.interpreter
 
 /**
