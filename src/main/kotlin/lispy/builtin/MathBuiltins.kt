@@ -76,7 +76,7 @@ class SubtractOp : MathSupport("-") {
 
 class DivideOp : MathSupport("/") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = cell.toList ().map { asFloat (it) }
+        val list = evalList (cell, interp).map { asFloat (it) }
         var total = list[0].value
 
         for (i in 1 until list.size) {
@@ -84,19 +84,6 @@ class DivideOp : MathSupport("/") {
         }
 
         return FloatValue (total)
-//        return if (coerced[0] is IntValue) {
-//            var total = (coerced[0] as IntValue).value
-//            for (i in 1 until coerced.size) {
-//                total /= (coerced[i] as IntValue).value
-//            }
-//            IntValue (total)
-//        } else {
-//            var total = (coerced[0] as FloatValue).value
-//            for (i in 1 until coerced.size) {
-//                total /= (coerced[i] as FloatValue).value
-//            }
-//            FloatValue (total)
-//        }
     }
 }
 
@@ -120,7 +107,7 @@ class AddOp : MathSupport("+") {
 }
 class MultOp : MathSupport("*") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = cell.toList ().map { asFloat (it) }
+        val list = evalList (cell, interp).map { asFloat (it) }
         var total = 1.0f
 
         for (i in list.indices) {
@@ -187,6 +174,7 @@ val MATH_EXTRAS = listOf (
                 1
                 (* n (factorial (- n 1)))))""",
     "(define (zero? x) (= x 0))",
+    "(define (abs x) ((if (< x 0) - +) x))",
     "(define (nonzero? x) (not (zero? x)))",
     """(define (clamp x lo hi)
             (cond ((< x lo) lo)

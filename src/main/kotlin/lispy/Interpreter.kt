@@ -14,6 +14,7 @@ private val DEBUG = false
  * Online interpreter at: https://inst.eecs.berkeley.edu/~cs61a/fa14/assets/interpreter/scheme.html
  * Lisp interpreter here: http://nhiro.org/learn_language/LISP-on-browser.html
  */
+
 class Interpreter (val provider: Provider) {
     private val env = mutableMapOf<String, Any> ()
     private val scopes = Stack<MutableMap<String, Any>> ()
@@ -86,6 +87,10 @@ class Interpreter (val provider: Provider) {
 
     fun eval (string: String): Any = eval (provider.parser.parse (string))
 
+    /**
+     *
+     */
+
     fun eval (expr: Expression): Expression {
         if (DEBUG) {
             println ("DEBUG ${expr}")
@@ -104,6 +109,11 @@ class Interpreter (val provider: Provider) {
             else -> throw IllegalStateException ("Didn't expect a ${expr::class.java}")
         }
     }
+
+    /**
+     *
+     */
+
 
     private fun evalCell (expr: ExpressionCell): Expression {
         if (expr.car == NilValue || expr.car == ExpressionCell.NIL) {

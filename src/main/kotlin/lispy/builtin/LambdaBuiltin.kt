@@ -27,12 +27,23 @@ class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expre
 
         val scope = mutableMapOf<String, Any>()
         params.forEachIndexed { i, value ->
-            scope.put(argList[i], value)
+            scope[argList[i]] = value
+            scope[PROCEDURE] = symbol
+            scope[FORMAL_PARAMETERS] = args
+            scope[OPERANDS] = params
+            scope[EXPRESSION] = lambda
         }
 
         return interp.scoped (scope) {
             interp.eval (lambda)
         }
+    }
+
+    companion object {
+        const val PROCEDURE = "__proc"
+        const val FORMAL_PARAMETERS = "__params"
+        const val OPERANDS = "__operands"
+        const val EXPRESSION = "__expr"
     }
 }
 
