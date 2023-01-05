@@ -23,6 +23,14 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
         }
     }
 
+    protected fun asFloat (e: Expression): FloatValue {
+        return when (e) {
+            is FloatValue -> e
+            is IntValue -> FloatValue (e.value.toFloat ())
+            else -> throw IllegalArgumentException ("Not numeric: $e")
+        }
+    }
+
     protected fun coerceArgs (cell: ExpressionCell, interp: Interpreter, expected: Int? = null): List<Expression> {
         val list = evalList (cell, interp)
         if (list.isEmpty ()) {
@@ -68,20 +76,27 @@ class SubtractOp : MathSupport("-") {
 
 class DivideOp : MathSupport("/") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
-        val coerced = coerceArgs (cell, interp)
-        return if (coerced[0] is IntValue) {
-            var total = (coerced[0] as IntValue).value
-            for (i in 1 until coerced.size) {
-                total /= (coerced[i] as IntValue).value
-            }
-            IntValue (total)
-        } else {
-            var total = (coerced[0] as FloatValue).value
-            for (i in 1 until coerced.size) {
-                total /= (coerced[i] as FloatValue).value
-            }
-            FloatValue (total)
+        val list = cell.toList ().map { asFloat (it) }
+        var total = list[0].value
+
+        for (i in 1 until list.size) {
+            total /= list[i].value
         }
+
+        return FloatValue (total)
+//        return if (coerced[0] is IntValue) {
+//            var total = (coerced[0] as IntValue).value
+//            for (i in 1 until coerced.size) {
+//                total /= (coerced[i] as IntValue).value
+//            }
+//            IntValue (total)
+//        } else {
+//            var total = (coerced[0] as FloatValue).value
+//            for (i in 1 until coerced.size) {
+//                total /= (coerced[i] as FloatValue).value
+//            }
+//            FloatValue (total)
+//        }
     }
 }
 
@@ -105,21 +120,14 @@ class AddOp : MathSupport("+") {
 }
 class MultOp : MathSupport("*") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
-        val coerced = coerceArgs (cell, interp)
+        val list = cell.toList ().map { asFloat (it) }
+        var total = 1.0f
 
-        return if (coerced[0] is IntValue) {
-            var total = 1
-            for (i in coerced.indices) {
-                total *= (coerced[i] as IntValue).value
-            }
-            IntValue (total)
-        } else {
-            var total = 1f
-            for (i in coerced.indices) {
-                total *= (coerced[i] as FloatValue).value
-            }
-            FloatValue (total)
+        for (i in list.indices) {
+            total *= list[i].value
         }
+
+        return FloatValue (total)
     }
 }
 

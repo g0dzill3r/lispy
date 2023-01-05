@@ -7,20 +7,20 @@ import lispy.*
  */
 class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expression) : InvokableSupport (symbol) {
     private val argList = buildList {
-        toList(args).map {
-            add((it as Symbol).symbol)
+        args.toList ().map {
+            add ((it as Symbol).symbol)
         }
     }
 
     override fun toString(): String = "(lambda $args $lambda)"
 
-    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
 
         // Check the parameters list
 
         val params = evalList (cell, interp)
         if (params.size != argList.size) {
-            throw IllegalArgumentException("Invalid argument count: expected ${argList.size} found ${params.size}")
+            throw IllegalArgumentException("Invalid argument count: expected ${argList.size} found ${params.size} in $cell")
         }
 
         // Include them in the current scope
@@ -73,7 +73,7 @@ class DefineOp : InvokableSupport ("define") {
 
         when (type) {
             is ExpressionCell -> {
-                val symbol = requireSymbol (type.car)
+                val operator = requireSymbol (type.car)
                 val args = if (type.cdr == NilValue) ExpressionCell.NIL else requireExpressionCell(type.cdr)
                 val procs = cell.cdr as ExpressionCell
                 val begin = when (procs.length) {
@@ -82,11 +82,11 @@ class DefineOp : InvokableSupport ("define") {
                     else -> ExpressionCell (Symbol ("begin"), procs)
                 }
 
-                val bound = BoundFunction (symbol.symbol, args, begin)
-                interp.put (symbol, bound, true)
+                val bound = BoundFunction (operator.symbol, args, begin)
+                interp.put (operator, bound, true)
             }
             is Symbol -> {
-                val list = toList (cell)
+                val list = cell.toList ()
                 if (list.size != 2) {
                     throw IllegalStateException ("Invalid argument count: ${list.size}")
                 }
@@ -101,11 +101,12 @@ class DefineOp : InvokableSupport ("define") {
 }
 
 /**
- * The begin operation which allows a set of expressions to comprise the body of a procedure.
+ * The begin operation which allows a set of expressions to comprise the body of a procedure. It returns
+ * the result of the last evaluation.
  */
 
 class BeginOp : InvokableSupport ("begin") {
-    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
         return if (eval.isEmpty()) {
             NilValue

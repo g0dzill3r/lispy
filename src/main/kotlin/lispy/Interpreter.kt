@@ -106,6 +106,9 @@ class Interpreter (val provider: Provider) {
     }
 
     private fun evalCell (expr: ExpressionCell): Expression {
+        if (expr.car == NilValue || expr.car == ExpressionCell.NIL) {
+            return ExpressionCell.NIL
+        }
         if (expr.car == NilValue) {
             throw IllegalStateException ("Cannot evaluate ${expr}")
         }

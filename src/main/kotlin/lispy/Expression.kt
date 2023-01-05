@@ -5,6 +5,7 @@ package lispy
  */
 
 open class Expression
+
 class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Expression () {
     val isNil: Boolean
         get () = car == NilValue && cdr == NilValue
@@ -22,6 +23,19 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
             }
             return total
         }
+
+    fun toList (list: MutableList<Expression> = mutableListOf ()): List<Expression> {
+        if (car != NilValue) {
+            list.add (car)
+        }
+        when (cdr) {
+            NIL -> Unit
+            is NilValue -> Unit
+            is ExpressionCell -> cdr.toList (list)
+            else -> throw IllegalStateException ("Malformed list: $cdr")
+        }
+        return list
+    }
 
     fun toBrackets (): String {
         return StringBuffer ().apply {

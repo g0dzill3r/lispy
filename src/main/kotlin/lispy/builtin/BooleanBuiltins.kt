@@ -8,7 +8,7 @@ import lispy.Interpreter
 class AndOp : InvokableSupport ("and") {
     override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
         var eval: Expression = BooleanValue.FALSE
-        toList (cell).forEach {
+        cell.toList ().forEach {
             eval = it
             if (it is ExpressionCell) {
                 eval = interp.eval (it)
@@ -28,7 +28,7 @@ class AndOp : InvokableSupport ("and") {
 
 class OrOp : InvokableSupport ("or") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
-        toList (cell).forEach {
+        cell.toList ().forEach {
             val eval = if (it is ExpressionCell) {
                 interp.eval (it)
             } else {

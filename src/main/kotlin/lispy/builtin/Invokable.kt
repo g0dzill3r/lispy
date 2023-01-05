@@ -11,29 +11,16 @@ abstract class InvokableSupport (override val symbol: String) : Invokable, Expre
     override fun toString(): String = "builtin:$symbol"
 
     fun evalList (cell: ExpressionCell, interp: Interpreter): List<Expression> {
-        val list = toList (cell)
+        val list = cell.toList ()
         return list.map {
             interp.eval (it)
         }
     }
 
     fun expect (cell: ExpressionCell, count: Int): List<Expression> {
-        val list = toList (cell)
+        val list = cell.toList ()
         if (list.size != count) {
             throw IllegalArgumentException ("Expected $count arguments; found ${list.size}")
-        }
-        return list
-    }
-
-    fun toList (cell: ExpressionCell, list: MutableList<Expression> = mutableListOf ()): List<Expression> {
-        if (cell.car != NilValue) {
-            list.add (cell.car)
-        }
-        when (cell.cdr) {
-            is NilValue -> Unit
-            ExpressionCell.NIL -> Unit
-            is ExpressionCell -> toList (cell.cdr, list)
-            else -> throw IllegalStateException ("Invalid cdr list list: ${cell.cdr}")
         }
         return list
     }
