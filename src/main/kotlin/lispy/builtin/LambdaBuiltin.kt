@@ -25,16 +25,16 @@ class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expre
 
         // Include them in the current scope
 
-        val scope = mutableMapOf<String, Any>()
+        val map = mutableMapOf<String, Any> ()
         params.forEachIndexed { i, value ->
-            scope[argList[i]] = value
-            scope[PROCEDURE] = symbol
-            scope[FORMAL_PARAMETERS] = args
-            scope[OPERANDS] = params
-            scope[EXPRESSION] = lambda
+            map.put (argList[i], value)
+            map.put (PROCEDURE, symbol)
+            map.put (FORMAL_PARAMETERS, args)
+            map.put (OPERANDS, params)
+            map.put (EXPRESSION, lambda)
         }
 
-        return interp.scoped (scope) {
+        return interp.scoped (map) {
             interp.eval (lambda)
         }
     }
@@ -94,7 +94,7 @@ class DefineOp : InvokableSupport ("define") {
                 }
 
                 val bound = BoundFunction (operator.symbol, args, begin)
-                interp.put (operator, bound, true)
+                interp.put (operator, bound)
             }
             is Symbol -> {
                 val list = cell.toList ()
@@ -102,7 +102,7 @@ class DefineOp : InvokableSupport ("define") {
                     throw IllegalStateException ("Invalid argument count: ${list.size}")
                 }
                 val rval = interp.eval (list [1])
-                interp.put (type, rval, true)
+                interp.put (type, rval)
             }
             else -> throw IllegalStateException ("Invalid lval type: ${type::class.simpleName}")
         }

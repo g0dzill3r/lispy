@@ -10,6 +10,13 @@ interface Invokable {
 abstract class InvokableSupport (override val symbol: String) : Invokable, Expression() {
     override fun toString(): String = "builtin:$symbol"
 
+//    private var scope: Scope? = null
+//    override fun getScope (): Scope = scope as Scope
+//    override fun setScope (scope: Scope) {
+//        this.scope = scope
+//        return
+//    }
+
     fun evalList (cell: ExpressionCell, interp: Interpreter): List<Expression> {
         val list = cell.toList ()
         return list.map {

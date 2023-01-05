@@ -32,7 +32,12 @@ class CondOp : InvokableSupport ("cond") {
             if (sublist.size != 2) {
                 throw IllegalArgumentException ("Expected 2 arguments found ${sublist.size} in $sublist")
             }
-            val result = interp.eval (sublist [0])
+
+            val result = if (sublist [0] is Symbol && (sublist [0] as Symbol).symbol == "else") {
+                BooleanValue.TRUE
+            } else {
+                interp.eval (sublist [0])
+            }
             if (result != BooleanValue.FALSE) {
                 return interp.eval (sublist[1])
             }

@@ -1,6 +1,5 @@
 package lispy
 
-import lispy.Provider
 import lispy.builtin.Builtins
 import lispy.builtin.Invokable
 import java.util.*
@@ -16,54 +15,24 @@ private val DEBUG = false
  */
 
 class Interpreter (val provider: Provider) {
-    private val env = mutableMapOf<String, Any> ()
-    private val scopes = Stack<MutableMap<String, Any>> ()
+    private val scopes = Stack<Scope> ()
 
-    val environment: Map<String, Any>
-        get () = env.toMap ()
+    val scope: Scope
+        get () = scopes.peek ()
 
-    val scope: Map<String, Any>?
-        get () = if (scopes.isEmpty()) {
-            null
-        } else {
-            scopes.peek ()
-        }
+    fun put (symbol: Symbol, value: Any) = scope.put (symbol.symbol, value)
+    fun put (symbol: String, value: Any) = scope.put (symbol, value)
 
-    fun <T> scoped (scope: MutableMap<String, Any>, func: () -> T): T {
+    fun get (symbol: Symbol): Any? = scope.get (symbol.symbol)
+    fun get (symbol: String): Any? = scope.get (symbol)
+
+    fun <T> scoped (map: MutableMap<String, Any>, func: () -> T): T {
         try {
-            scopes.push (scope)
+            scopes.push (Scope (map, scope))
             return func ()
         }
         finally {
             scopes.pop ()
-        }
-    }
-
-    fun put (symbol: Symbol, value: Any, global: Boolean = false) = put (symbol.symbol, value, global)
-
-    fun put (symbol: String, value: Any, global: Boolean = false) {
-        if (global) {
-            if (env.containsKey(symbol)) {
-                println ("WARNING: Redefining global '$symbol'")
-            }
-            env[symbol] = value
-        } else {
-            if (scopes.isEmpty ()) {
-                throw IllegalStateException ("No active scope.")
-            } else {
-                scopes.peek ()!![symbol] = value
-            }
-        }
-        return
-    }
-
-    fun get (symbol: Symbol): Any? = get (symbol.symbol)
-
-    fun get (symbol: String): Any? {
-        return if (scopes.isNotEmpty()) {
-            scopes.peek ().get (symbol) ?: env [symbol]
-        } else {
-            env [symbol]
         }
     }
 
@@ -72,13 +41,10 @@ class Interpreter (val provider: Provider) {
     }
 
     fun reset () {
-        env.clear ()
         scopes.clear ()
-        env.apply {
-            put ("else", BooleanValue (true))
-        }
+        scopes.push (Scope ())
         Builtins.ALL.forEach {
-            env[it.symbol] = it
+            scope.put (it.symbol, it)
         }
         Builtins.EXTRAS.forEach {
             eval (it)
@@ -98,7 +64,7 @@ class Interpreter (val provider: Provider) {
         return when (expr) {
             is Value -> expr
             is Symbol -> {
-                val value = get (expr)
+                val value = scope.get (expr)
                 when (value) {
                     null -> NilValue
                     is Expression -> value
@@ -127,7 +93,10 @@ class Interpreter (val provider: Provider) {
             throw IllegalStateException ("Unrecognized symbol: ${expr.car}")
         }
         return when (car) {
-            is Invokable -> car.invoke (if (expr.cdr is ExpressionCell) expr.cdr else ExpressionCell.NIL, this) // TODO: This is a hack, fix me.
+            is Invokable -> {
+                val cell = if (expr.cdr is ExpressionCell) expr.cdr else ExpressionCell.NIL
+                car.invoke (cell, this)
+            }
             else -> throw IllegalStateException ("Expected symbol; found $car")
         }
     }
