@@ -51,7 +51,18 @@ class Interpreter (val provider: Provider) {
         }
     }
 
-    fun eval (string: String): Any = eval (provider.parser.parse (string))
+    /**
+     * Evaluate some number of expressions in a string
+     */
+
+    fun eval (string: String): Expression {
+        val els = provider.parser.parseMany (string)
+        var result: Expression = NilValue
+        els.forEach {
+            result = eval (it)
+        }
+        return result
+    }
 
     /**
      *

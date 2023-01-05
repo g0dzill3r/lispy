@@ -1,7 +1,7 @@
 package lispy
 
 /**
- * Represents a lexical scope.
+ * Represents a lexical scope created by invocation of a procedure.
  */
 
 class Scope (val map: MutableMap<String, Any> = mutableMapOf (), val parent: Scope? = null) {
@@ -9,9 +9,6 @@ class Scope (val map: MutableMap<String, Any> = mutableMapOf (), val parent: Sco
 
     fun put (symbol: String, value: Any) {
         map[symbol] = value
-//        if (value is Scoped) {
-//            value.setScope (this)
-//        }
         return
     }
 
