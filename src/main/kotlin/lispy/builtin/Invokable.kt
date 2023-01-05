@@ -32,6 +32,13 @@ abstract class InvokableSupport (override val symbol: String) : Invokable, Expre
         return list
     }
 
+    protected fun requireString (expr: Expression): StringValue {
+        if (expr !is StringValue) {
+            throw IllegalArgumentException ("Not a string: $expr")
+        }
+        return expr
+    }
+
     protected fun requireSymbol (expr: Expression): Symbol {
         if (expr !is Symbol) {
             throw IllegalArgumentException ("Not a symbol: $expr")

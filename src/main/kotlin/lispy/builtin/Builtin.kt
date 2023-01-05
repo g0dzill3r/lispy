@@ -5,7 +5,7 @@ import lispy.*
 
 object Builtins {
     val ALL = listOf (
-        ScopeOp (), ResetOp (),
+        ScopeOp (), ResetOp (), FormatOp (),
         NoopOp (), DumpOp (), QuoteOp (), DefineOp (), DisplayOp (), LambdaOp (), NewlineOp (), BeginOp (),
         AddOp (), MultOp (), SubtractOp (), DivideOp (), ModulusOp (),
         EqualsOp (), LessThanOp (), GreaterThanOp (),
