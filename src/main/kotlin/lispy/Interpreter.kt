@@ -10,6 +10,7 @@ private val DEBUG = false
  * A simple scheme interpreter.
  *
  * Book at: https://web.mit.edu/6.001/6.037/sicp.pdf
+ * Also: https://www.cs.rpi.edu/academics/courses/fall00/ai/scheme/reference/schintro-v14/schintro_56.html
  * Online interpreter at: https://inst.eecs.berkeley.edu/~cs61a/fa14/assets/interpreter/scheme.html
  * Lisp interpreter here: http://nhiro.org/learn_language/LISP-on-browser.html
  */

@@ -30,3 +30,9 @@ tan
 1:   (define (sum-iter x acc) (if (= x 0) acc (sum-iter (- x 1) (+ acc x))))
 2:   (sum-iter x 0)
 3: )
+
+IDEAS
+
+add coercion functions to the Expression base class?
+demo the closure
+require scope for an eval

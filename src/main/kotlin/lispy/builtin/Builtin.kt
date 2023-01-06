@@ -9,7 +9,7 @@ object Builtins {
         NoopOp (), DumpOp (), QuoteOp (), DefineOp (), DisplayOp (), LambdaOp (), NewlineOp (), BeginOp (),
         AddOp (), MultOp (), SubtractOp (), DivideOp (), ModulusOp (),
         EqualsOp (), LessThanOp (), GreaterThanOp (),
-        ListOp (), CarOp (), CdrOp (), ConsOp (), NullOp (),
+        ListOp (), CarOp (), CdrOp (), ConsOp (), NullOp (), LetOp (),
         CondOp (), IfOp (),
         OrOp (), AndOp (), NotOp ()
     )

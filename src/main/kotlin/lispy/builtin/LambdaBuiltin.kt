@@ -7,7 +7,7 @@ data class ActivationRecord (val symbol: String, val params: ExpressionCell, var
 /**
  * Data structure for storing non-builtin functions (bound and lambdas).
  */
-class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expression) : InvokableSupport (symbol) {
+class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expression, val closure: Scope) : InvokableSupport (symbol) {
     private val argList = buildList {
         args.toList ().map {
             add ((it as Symbol).symbol)
@@ -64,7 +64,7 @@ class LambdaOp : InvokableSupport ("lambda") {
             1 -> procs.car
             else -> ExpressionCell (Symbol ("begin"), procs)
         }
-        return BoundFunction ("lambda", args, begin)
+        return BoundFunction ("lambda", args, begin, interp.scope)
     }
 }
 
@@ -92,7 +92,7 @@ class DefineOp : InvokableSupport ("define") {
                     else -> ExpressionCell (Symbol ("begin"), procs)
                 }
 
-                val bound = BoundFunction (operator.symbol, args, begin)
+                val bound = BoundFunction (operator.symbol, args, begin, interp.scope)
                 interp.put (operator, bound)
             }
             is Symbol -> {
@@ -121,6 +121,42 @@ class BeginOp : InvokableSupport ("begin") {
         return if (eval.isEmpty()) {
             NilValue
         } else {
+            eval.last ()
+        }
+    }
+}
+
+
+/**
+ * (let ((x 1) (y 2) (z 3))
+ *   (+ x y z)
+ * )
+ */
+
+class LetOp : InvokableSupport ("let") {
+    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+        if (cell.length < 2) {
+            throw IllegalArgumentException ("Expected 2+ arguments found ${cell.length}")
+        }
+
+        // Convert the arguments to a map that we can generate a scope form
+
+        val args = requireExpressionCell (cell.car)
+        val map = mutableMapOf<String, Any> ().apply {
+            args.toList().forEach {
+                it as ExpressionCell
+                if (it.length != 2) {
+                    throw IllegalStateException ("Expected 2 elements; found ${it.length}")
+                }
+                val arg = requireSymbol (it.car)
+                val value = interp.eval (requireExpressionCell(it.cdr).car)
+                put (arg.symbol, value)
+            }
+        }
+
+        return interp.scoped (map) {
+            val begin = requireExpressionCell (cell.cdr)
+            val eval = evalList (begin, interp)
             eval.last ()
         }
     }

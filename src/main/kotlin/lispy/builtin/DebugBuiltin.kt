@@ -81,29 +81,14 @@ class FormatOp: InvokableSupport ("format") {
 
 class StackOp : InvokableSupport ("stack?") {
     override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = getStack (interp)
+        val list = interp.scope.getStack ()
         list.forEachIndexed { i, el ->
             val params = el.params.toList ()
             val operands = el.operands.toList ()
             val arguments = params.mapIndexed { i, v -> "$v=${operands[i]}" }
-            println ("${list.size - i}: ${if (el.symbol == "lambda") el.lambda else el.symbol} $arguments")
+            println ("${i}: ${if (el.symbol == "lambda") el.lambda else el.symbol} $arguments")
         }
         return NilValue
-    }
-
-    companion object {
-        fun getStack (interp: Interpreter): List<ActivationRecord> {
-            val list = mutableListOf<ActivationRecord> ()
-            var scope: Scope? = interp.scope
-            while (scope != null) {
-                val rec = scope.get ("_")
-                if (rec != null) {
-                    list.add (rec as ActivationRecord)
-                }
-                scope = scope.parent
-            }
-            return list
-        }
     }
 }
 
