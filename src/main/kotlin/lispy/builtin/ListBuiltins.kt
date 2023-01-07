@@ -60,7 +60,6 @@ class NullOp : InvokableSupport ("null?") {
 }
 
 val LIST_EXTRAS = listOf (
-    "(define (identity x) x)",
     "(define (cadr x) (car (cdr x)))",
     "(define (caddr x) (car (cdr (cdr x))))",
     "(define (cadddr x) (car (cdr (cdr (cdr x)))))",

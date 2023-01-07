@@ -4,7 +4,31 @@ package lispy
  * The expression is the parent type of all scheme data types.
  */
 
-open class Expression
+open class Expression {
+    val asString: StringValue
+        get () {
+            if (this !is StringValue) {
+                throw IllegalArgumentException ("Not a string: $this")
+            }
+            return this
+        }
+
+    val asSymbol: Symbol
+        get () {
+            if (this !is Symbol) {
+                throw IllegalArgumentException ("Not a symbol: $this")
+            }
+            return this
+        }
+
+    val asCell: ExpressionCell
+        get () {
+            if (this !is ExpressionCell) {
+                throw IllegalArgumentException ("Not an expression cell: $this")
+            }
+            return this
+        }
+}
 
 class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Expression () {
     val isNil: Boolean

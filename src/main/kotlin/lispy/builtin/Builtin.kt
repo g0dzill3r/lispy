@@ -5,12 +5,13 @@ import lispy.*
 
 object Builtins {
     val ALL = listOf (
-        ScopeOp (), ResetOp (), FormatOp (), StackOp (),
+        ScopeOp (), ResetOp (), FormatOp (), StackOp (), IdentityOp (),
         NoopOp (), DumpOp (), QuoteOp (), DefineOp (), DisplayOp (), LambdaOp (), NewlineOp (), BeginOp (),
         AddOp (), MultOp (), SubtractOp (), DivideOp (), ModulusOp (),
         EqualsOp (), LessThanOp (), GreaterThanOp (),
-        ListOp (), CarOp (), CdrOp (), ConsOp (), NullOp (), LetOp (),
+        ListOp (), CarOp (), CdrOp (), ConsOp (), NullOp (), LetOp (), LetRecOp (),
         CondOp (), IfOp (),
+        IsBooleanOp (), IsStringOp (), IsSymbolOp (), IsProcedureOp (), IsNumberOp (), IsCharacterOp (), IsListOp (),
         OrOp (), AndOp (), NotOp ()
     )
     val EXTRAS = buildList {
@@ -61,8 +62,6 @@ object Builtins {
 }
 
 private val TEST_EXTRAS = listOf (
-    "(define a '(1 2 3 4 5))",
-    "(define b '())",
     "(define (length l) (if (null? l) 0 (+ 1 (length (cdr l)))))"
 )
 

@@ -10,6 +10,19 @@ interface Invokable {
 abstract class InvokableSupport (override val symbol: String) : Invokable, Expression() {
     override fun toString(): String = "builtin:$symbol"
 
+    val isBuiltin: Boolean
+        get () = closure == null
+
+    val isNotBuiltin: Boolean
+        get () = closure != null
+
+    var closure: Scope? = null
+
+    fun setScope (scope: Scope) {
+        closure = scope
+        return
+    }
+
     fun evalList (cell: ExpressionCell, interp: Interpreter): List<Expression> {
         val list = cell.toList ()
         return list.map {

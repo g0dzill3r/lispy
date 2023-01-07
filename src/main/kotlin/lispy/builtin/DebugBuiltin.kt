@@ -23,6 +23,19 @@ class ResetOp : InvokableSupport ("${'$'}reset") {
 }
 
 /**
+ * Simple built-in that returns the expression provided.
+ */
+
+class IdentityOp : InvokableSupport ("identity") {
+    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+        if (cell.length != 1) {
+            throw IllegalStateException ("Expected 1 argument found ${cell.length}.")
+        }
+        return interp.eval (cell.car)
+    }
+}
+
+/**
  * (define (loop x y λ)
  *   (if (> x y)
  *       nil
@@ -81,13 +94,14 @@ class FormatOp: InvokableSupport ("format") {
 
 class StackOp : InvokableSupport ("stack?") {
     override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = interp.scope.getStack ()
-        list.forEachIndexed { i, el ->
-            val params = el.params.toList ()
-            val operands = el.operands.toList ()
-            val arguments = params.mapIndexed { i, v -> "$v=${operands[i]}" }
-            println ("${i}: ${if (el.symbol == "lambda") el.lambda else el.symbol} $arguments")
-        }
+        println (interp.scope)
+//        val list = interp.scope.getStack ()
+//        list.forEachIndexed { i, el ->
+//            val params = el.params.toList ()
+//            val operands = el.operands.toList ()
+//            val arguments = params.mapIndexed { i, v -> "$v=${operands[i]}" }
+//            println ("${i}: ${if (el.symbol == "lambda") el.lambda else el.symbol} $arguments")
+//        }
         return NilValue
     }
 }

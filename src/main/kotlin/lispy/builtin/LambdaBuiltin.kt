@@ -7,7 +7,7 @@ data class ActivationRecord (val symbol: String, val params: ExpressionCell, var
 /**
  * Data structure for storing non-builtin functions (bound and lambdas).
  */
-class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expression, val closure: Scope) : InvokableSupport (symbol) {
+class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expression) : InvokableSupport (symbol) {
     private val argList = buildList {
         args.toList ().map {
             add ((it as Symbol).symbol)
@@ -27,12 +27,19 @@ class BoundFunction (symbol: String, val args: ExpressionCell, val lambda: Expre
 
         // Include them in the current scope
 
-        val map = mutableMapOf<String, Any> ()
+        val map = mutableMapOf<String, Expression> ()
         params.forEachIndexed { i, value ->
             map.put (argList[i], value)
-            map.put ("_", ActivationRecord (symbol, args, ExpressionCell.fromList (params), lambda))
+//            map.put ("_", ActivationRecord (symbol, args, ExpressionCell.fromList (params), lambda))
         }
 
+        closure?.let {
+            return interp.scoped (it) {
+                interp.scoped (map) {
+                    interp.eval (lambda)
+                }
+            }
+        }
         return interp.scoped (map) {
             interp.eval (lambda)
         }
@@ -64,7 +71,9 @@ class LambdaOp : InvokableSupport ("lambda") {
             1 -> procs.car
             else -> ExpressionCell (Symbol ("begin"), procs)
         }
-        return BoundFunction ("lambda", args, begin, interp.scope)
+        return BoundFunction ("lambda", args, begin).apply {
+            closure = interp.scope
+        }
     }
 }
 
@@ -92,7 +101,8 @@ class DefineOp : InvokableSupport ("define") {
                     else -> ExpressionCell (Symbol ("begin"), procs)
                 }
 
-                val bound = BoundFunction (operator.symbol, args, begin, interp.scope)
+                val bound = BoundFunction (operator.symbol, args, begin)
+                bound.closure = interp.scope
                 interp.put (operator, bound)
             }
             is Symbol -> {
@@ -128,6 +138,9 @@ class BeginOp : InvokableSupport ("begin") {
 
 
 /**
+ * Introduces lexically scoped symbols. In this variant (Also see [LetRecOp]) prior
+ * assignments are not available in subsequent expressions.
+ *
  * (let ((x 1) (y 2) (z 3))
  *   (+ x y z)
  * )
@@ -142,7 +155,7 @@ class LetOp : InvokableSupport ("let") {
         // Convert the arguments to a map that we can generate a scope form
 
         val args = requireExpressionCell (cell.car)
-        val map = mutableMapOf<String, Any> ().apply {
+        val map = mutableMapOf<String, Expression> ().apply {
             args.toList().forEach {
                 it as ExpressionCell
                 if (it.length != 2) {
@@ -160,6 +173,40 @@ class LetOp : InvokableSupport ("let") {
             eval.last ()
         }
     }
+}
+
+/**
+ *
+ */
+
+class LetRecOp : InvokableSupport ("letrec") {
+    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
+        if (cell.length < 2) {
+            throw IllegalArgumentException ("Expected 2+ arguments found ${cell.length}")
+        }
+
+        // Convert the arguments to a map that we can generate a scope form
+
+        val args = requireExpressionCell (cell.car)
+        val map = mutableMapOf<String, Expression> ()
+
+        return interp.scoped (map) {
+            args.toList().forEach {
+                it as ExpressionCell
+                if (it.length != 2) {
+                    throw IllegalStateException ("Expected 2 elements; found ${it.length}")
+                }
+                val arg = requireSymbol (it.car)
+                val value = interp.eval (requireExpressionCell (it.cdr).car)
+                map[arg.symbol] = value
+            }
+
+            val begin = requireExpressionCell (cell.cdr)
+            val eval = evalList (begin, interp)
+            eval.last ()
+        }
+    }
+
 }
 
 // EOF

@@ -185,7 +185,6 @@ val MATH_EXTRAS = listOf (
     // Aliases using unicode characters
     "(define ≤ <=)",
     "(define ≥ >=)",
-    "(define √ sqrt)",
     "(define ÷ /)",
     "(define (sum L) (fold-right + 0 L))",
     "(define ∑ sum)",

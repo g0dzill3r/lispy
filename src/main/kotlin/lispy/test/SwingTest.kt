@@ -1,6 +1,7 @@
 package lispy.test
 
 import lispy.Interpreter
+import lispy.NilValue
 import lispy.ProviderFactory
 import java.awt.Color
 import java.awt.Font
@@ -18,7 +19,7 @@ fun main() {
     MinimalSwingApplication {
         val output = try {
             val result = interp.eval (it)
-            result.map { "-> $it" }.joinToString ("\n")
+            result.filter { it != NilValue }.map { "-> $it" }.joinToString ("\n")
         } catch (e: Exception) {
             e.message ?: ""
         }

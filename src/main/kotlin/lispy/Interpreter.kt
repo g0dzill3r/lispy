@@ -12,6 +12,7 @@ private val DEBUG = false
  * Book at: https://web.mit.edu/6.001/6.037/sicp.pdf
  * Also: https://www.cs.rpi.edu/academics/courses/fall00/ai/scheme/reference/schintro-v14/schintro_56.html
  * Online interpreter at: https://inst.eecs.berkeley.edu/~cs61a/fa14/assets/interpreter/scheme.html
+ * Scheme basics: https://courses.cs.washington.edu/courses/cse341/02wi/scheme/basics.html
  * Lisp interpreter here: http://nhiro.org/learn_language/LISP-on-browser.html
  */
 
@@ -21,21 +22,36 @@ class Interpreter (val provider: Provider) {
     val scope: Scope
         get () = scopes.peek ()
 
-    fun put (symbol: Symbol, value: Any) = scope.put (symbol.symbol, value)
-    fun put (symbol: String, value: Any) = scope.put (symbol, value)
+    fun put (symbol: Symbol, value: Expression) = scope.put (symbol.symbol, value)
+    fun put (symbol: String, value: Expression) = scope.put (symbol, value)
 
-    fun get (symbol: Symbol): Any? = scope.get (symbol.symbol)
-    fun get (symbol: String): Any? = scope.get (symbol)
+    fun get (symbol: Symbol): Any = get (symbol.symbol)
+    fun get (symbol: String): Any {
+        for (i in scopes.indices.reversed ()) {
+            val static = i == scopes.size - 1
+            val maybe = scopes[i].get (symbol, static)
+            if (maybe != null) {
+                return maybe
+            }
+        }
+        throw IllegalStateException ("Unknown identifier: ${symbol}")
+    }
 
-    fun <T> scoped (map: MutableMap<String, Any>, func: () -> T): T {
+    fun <T> scoped (scope: Scope?, func: () -> T): T {
         try {
-            scopes.push (Scope (map, scope))
+            if (scope != null) {
+                scopes.push (scope)
+            }
             return func ()
         }
         finally {
-            scopes.pop ()
+            if (scope != null) {
+                scopes.pop ()
+            }
         }
     }
+
+    fun <T> scoped (map: MutableMap<String, Expression>, func: () -> T): T = scoped (Scope (map, scope), func)
 
     init {
         reset ()
@@ -52,29 +68,42 @@ class Interpreter (val provider: Provider) {
         }
     }
 
+    fun dumpScope (scope: Scope) {
+        for ((key, value) in scope.map) {
+            println ("  $key = $value")
+        }
+        return
+    }
+
+    fun dumpScopes () {
+        for (i in scopes.indices) {
+            println ("SCOPE $i =================")
+            dumpScope (scopes[i])
+        }
+        return
+    }
+
     /**
      * Evaluate some number of expressions in a string
      */
 
     fun eval (string: String): List<Expression> {
         val els = provider.parser.parseMany (string)
-        return els.map { eval (it) }
+        return els.map {
+            eval (it)
+        }
     }
 
     /**
-     *
+     * Used to evaluate an arbitrary expression.
      */
 
     fun eval (expr: Expression): Expression {
-        if (DEBUG) {
-            println ("DEBUG ${expr}")
-        }
         return when (expr) {
             is Value -> expr
             is Symbol -> {
-                val value = scope.get (expr)
+                val value = get (expr)
                 when (value) {
-                    null -> NilValue
                     is Expression -> value
                     else -> StringValue ("${value::class.simpleName}:${value}")
                 }
@@ -85,9 +114,8 @@ class Interpreter (val provider: Provider) {
     }
 
     /**
-     *
+     * Used to invoke a procedure.
      */
-
 
     private fun evalCell (expr: ExpressionCell): Expression {
         if (expr.car == NilValue || expr.car == ExpressionCell.NIL) {
@@ -109,6 +137,5 @@ class Interpreter (val provider: Provider) {
         }
     }
 }
-
 
 // EOF

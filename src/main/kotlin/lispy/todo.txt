@@ -36,3 +36,36 @@ IDEAS
 add coercion functions to the Expression base class?
 demo the closure
 require scope for an eval
+
+
+
+### closures
+
+(define x 100)
+(list "outer" x)
+
+(define (foo x)
+  (define (show-x where) (list where x))
+  (show-x "foo")
+  (let ((x 103))
+    (show-x "let")
+  )
+)
+(foo 101)
+
+
+
+### LET LETREC ###
+
+
+(list a b c)
+
+(lambda ()
+  (define a 1)
+  (define b 2)
+  (define c 3)
+
+  (letrec ((a (+ a 1)) (b (+ a 2)) (c (+ a 3)))
+    (list a b c)
+  )
+)
