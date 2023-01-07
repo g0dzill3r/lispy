@@ -6,7 +6,7 @@ import lispy.*
 object Builtins {
     val ALL = listOf (
         ScopeOp (), ResetOp (), FormatOp (), StackOp (), IdentityOp (),
-        NoopOp (), DumpOp (), QuoteOp (), DefineOp (), DisplayOp (), LambdaOp (), NewlineOp (), BeginOp (),
+        NoopOp (), DumpOp (), QuoteOp (), DefineOp (), DisplayOp (), LambdaOp (), NewlineOp (), BeginOp (), SetOp (),
         AddOp (), MultOp (), SubtractOp (), DivideOp (), ModulusOp (),
         EqualsOp (), LessThanOp (), GreaterThanOp (),
         ListOp (), CarOp (), CdrOp (), ConsOp (), NullOp (), LetOp (), LetRecOp (),
@@ -18,6 +18,7 @@ object Builtins {
         addAll (MATH_EXTRAS)
         addAll (LIST_EXTRAS)
         addAll (TEST_EXTRAS)
+        addAll (LAMBDA_EXTRAS)
     }
 
     class QuoteOp : InvokableSupport("quote") {

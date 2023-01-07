@@ -206,7 +206,27 @@ class LetRecOp : InvokableSupport ("letrec") {
             eval.last ()
         }
     }
-
 }
+
+/**
+ *
+ */
+
+class SetOp : InvokableSupport ("set!") {
+    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
+        if (cell.length != 2) {
+            throw IllegalArgumentException ("Expected 2 arguments, found ${cell.length}")
+        }
+        val symbol = requireSymbol (cell.car)
+        val value = interp.eval (requireExpressionCell (cell.cdr).car)
+        val scope = interp.locate (symbol)
+        scope.put (symbol.symbol, value)
+        return NilValue
+    }
+}
+
+val LAMBDA_EXTRAS = listOf (
+    "(define let* letrec)"
+)
 
 // EOF

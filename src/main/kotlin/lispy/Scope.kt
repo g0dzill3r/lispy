@@ -26,6 +26,22 @@ class Scope (val map: MutableMap<String, Expression> = mutableMapOf (), val pare
         }
     }
 
+    fun locate (symbol: String, static: Boolean = false): MutableMap<String, Expression>? {
+        return if (static) {
+            if (map.containsKey (symbol)) {
+                map
+            } else {
+                parent?.locate (symbol)
+            }
+        } else {
+            if (map.containsKey (symbol)) {
+                map
+            } else {
+                null
+            }
+        }
+    }
+
     override fun toString (): String {
         return StringBuffer ().apply {
             val filtered = map.filter {

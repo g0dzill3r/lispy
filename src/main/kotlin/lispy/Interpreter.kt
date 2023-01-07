@@ -25,11 +25,25 @@ class Interpreter (val provider: Provider) {
     fun put (symbol: Symbol, value: Expression) = scope.put (symbol.symbol, value)
     fun put (symbol: String, value: Expression) = scope.put (symbol, value)
 
-    fun get (symbol: Symbol): Any = get (symbol.symbol)
-    fun get (symbol: String): Any {
+    fun get (symbol: Symbol): Expression = get (symbol.symbol)
+    fun get (symbol: String): Expression {
         for (i in scopes.indices.reversed ()) {
+            // TODO: We can short circuit this if the static chain and dynamic are the same
             val static = i == scopes.size - 1
             val maybe = scopes[i].get (symbol, static)
+            if (maybe != null) {
+                return maybe
+            }
+        }
+        throw IllegalStateException ("Unknown identifier: ${symbol}")
+    }
+
+    fun locate (symbol: Symbol): MutableMap<String, Expression> = locate (symbol.symbol)
+    fun locate (symbol: String): MutableMap<String, Expression> {
+        for (i in scopes.indices.reversed ()) {
+            // TODO: We can short circuit this if the static chain and dynamic are the same
+            val static = i == scopes.size - 1
+            val maybe = scopes[i].locate (symbol, static)
             if (maybe != null) {
                 return maybe
             }
@@ -133,6 +147,7 @@ class Interpreter (val provider: Provider) {
                 val cell = if (expr.cdr is ExpressionCell) expr.cdr else ExpressionCell.NIL
                 car.invoke (cell, this)
             }
+//            is Value -> car
             else -> throw IllegalStateException ("Expected symbol; found $car")
         }
     }
