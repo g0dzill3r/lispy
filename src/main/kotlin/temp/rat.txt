@@ -1,0 +1,54 @@
+(define (make-rat a b)
+  (cons a b)
+)
+(define (numer r) (car r))
+(define (denom r) (cdr r))
+
+
+(define a (make-rat 1 3))
+a
+(numer a)
+(numer b)
+
+
+(define (add-rat x y)
+  (make-rat
+    (+ (* (numer x) (denom y)) (* (numer y) (denom x)))
+    (* (denom x) (denom y))
+  )
+)
+(define (sub-rat x y)
+  (make-rat
+    (- (* (numer x) (denom y)) (* (numer y) (denom x)))
+    (* (denom x) (denom y))
+  )
+)
+(define (mul-rat x y)
+  (make-rat
+    (* (numer x)(numer y))
+    (* (denom y)(denom x))
+  )
+)
+(define (div-rat x y)
+  (make-rat
+    (* (numer x)(denom y))
+    (* (numer y)(denom x))
+   )
+)
+
+
+(add-rat a b)
+(sub-rat a b)
+(sub-rat b a)
+(mul-rat a b)
+(mul-rat b a)
+(div-rat a b)
+(div-rat b a)
+
+(define (equal-rat x y)
+  (= (* (numer x)(denom y))
+     (* (numer y)(denom x))
+  )
+)
+
+(equal-rat (make-rat 1 2) (make-rat 2 4))

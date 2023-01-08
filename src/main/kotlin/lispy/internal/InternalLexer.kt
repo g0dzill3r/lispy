@@ -13,6 +13,7 @@ class InternalLexer : Lexer {
             val source = Source (input)
             while (source.hasNext ()) {
                 when (source.peek ()) {
+                    ';' -> readComment (source)
                     '(' -> {
                         source.next ()
                         yield (Token.LeftParen(source.location))
@@ -70,6 +71,25 @@ class InternalLexer : Lexer {
         } else {
             Token.Integer(buf.toString().toInt(), source.location)
         }
+    }
+
+    /**
+     * Reads a comment from the source. We'll just eat up characters
+     * until we get to the end of the line.
+     */
+
+    private fun readComment (source: Source): String {
+        val buf = StringBuffer ()
+
+        while (source.hasNext ()) {
+            val c = source.next ()
+            if (c == '\n') {
+                break
+            }
+            buf.append (c)
+        }
+
+        return buf.toString ()
     }
 
     private fun readString (source: Source): Token {
