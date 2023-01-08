@@ -2,6 +2,21 @@ package lispy.builtin
 
 import lispy.*
 
+private val COND_EXTRAS = listOf ("")
+
+private val COND_BUILTINS = listOf (
+    CondOp::class,
+    IfOp::class
+)
+
+object CondBuiltins : OpSource {
+    override val extras: List<String>
+        get() = COND_EXTRAS
+
+    override val buildins: List<Invokable>
+        get() = instances (COND_BUILTINS)
+}
+
 /**
  *
  */

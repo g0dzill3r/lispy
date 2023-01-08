@@ -4,6 +4,28 @@ import lispy.BooleanValue
 import lispy.Expression
 import lispy.ExpressionCell
 import lispy.Interpreter
+import kotlin.reflect.KClass
+
+val BOOLEAN_EXTRAS = listOf (
+    "1"
+)
+val BOOLEAN_BULTINS = listOf (
+    AndOp::class, OrOp::class, NotOp::class
+)
+
+object BooleanBuiltins : OpSource {
+    override val extras: List<String>
+        get() = BOOLEAN_EXTRAS
+
+    override val buildins: List<Invokable>
+        get() = instances (BOOLEAN_BULTINS)
+}
+
+fun <T: Invokable> instances (types: List<KClass<out T>>): List<T> {
+    return types.map {
+        it.java.getConstructor().newInstance()
+    }
+}
 
 class AndOp : InvokableSupport ("and") {
     override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {

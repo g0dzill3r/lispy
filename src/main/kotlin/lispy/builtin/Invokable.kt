@@ -33,7 +33,7 @@ abstract class InvokableSupport (override val symbol: String) : Invokable, Expre
     fun expect (cell: ExpressionCell, count: Int): List<Expression> {
         val list = cell.toList ()
         if (list.size != count) {
-            throw IllegalArgumentException ("Expected $count arguments; found ${list.size}")
+            throw IllegalArgumentException ("Expected $count arguments; found ${list.size} in ${cell}")
         }
         return list
     }

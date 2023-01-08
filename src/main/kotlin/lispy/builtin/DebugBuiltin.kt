@@ -2,6 +2,28 @@ package lispy.builtin
 
 import lispy.*
 
+private val DEBUG_EXTRAS = listOf (
+    "#t"
+)
+
+private val DEBUG_BUILTINS = listOf (
+    ScopeOp::class,
+    ResetOp::class,
+    IdentityOp::class,
+    FormatOp::class,
+    StackOp::class,
+    RuntimeOp::class
+)
+
+
+object DebugBuiltins : OpSource {
+    override val extras: List<String>
+        get() = DEBUG_EXTRAS
+
+    override val buildins: List<Invokable>
+        get() = instances (DEBUG_BUILTINS)
+}
+
 class ScopeOp : InvokableSupport ("${'$'}scope") {
     override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
         interp.scope.map.forEach { (key, value) ->
@@ -104,6 +126,10 @@ class StackOp : InvokableSupport ("stack?") {
 //        }
         return NilValue
     }
+}
+
+class RuntimeOp: InvokableSupport ("runtime") {
+    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression = IntValue ((System.currentTimeMillis() - interp.startTime).toInt ())
 }
 
 // EOF

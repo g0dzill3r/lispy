@@ -2,6 +2,30 @@ package lispy.builtin
 
 import lispy.*
 
+
+private val TYPE_EXTRAS = listOf (
+    "1"
+)
+
+private val TYPE_BUILTINS = listOf (
+    IsBooleanOp::class,
+    IsStringOp::class,
+    IsSymbolOp::class,
+    IsProcedureOp::class,
+    IsNumberOp::class,
+    IsVectorOp::class,
+    IsCharacterOp::class,
+    IsListOp::class
+)
+
+object TypeBuiltins : OpSource {
+    override val extras: List<String>
+        get() = TYPE_EXTRAS
+
+    override val buildins: List<Invokable>
+        get() = instances (TYPE_BUILTINS)
+}
+
 class IsBooleanOp : InvokableSupport ("boolean?") {
     override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is BooleanValue)
 }

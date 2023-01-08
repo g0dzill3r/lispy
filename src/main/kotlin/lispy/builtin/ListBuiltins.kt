@@ -3,6 +3,43 @@ package lispy.builtin
 import lispy.*
 import java.lang.IllegalArgumentException
 
+
+private val LIST_EXTRAS = listOf (
+    "(define (cadr x) (car (cdr x)))",
+    "(define (caddr x) (car (cdr (cdr x))))",
+    "(define (cadddr x) (car (cdr (cdr (cdr x)))))",
+    "(define (mapcar f L) (if (null? L) '() (cons (f (car L)) (mapcar f (cdr L)))))",
+    "(define (reverse x) (_reverse x '()))",
+    "(define (_reverse a b) (if (null? a) b (_reverse (cdr a) (cons (car a) b))))",
+    """(define (fold-right f init seq)
+           (if (null? seq)
+               init
+               (f (car seq)
+                  (fold-right f init (cdr seq)))))""",
+    """(define (fold-left f init seq)
+           (if (null? seq)
+               init
+               (fold-left f
+                          (f init (car seq))
+                          (cdr seq))))"""
+)
+
+private val LIST_BUILTINS = listOf (
+    ListOp::class,
+    CarOp::class,
+    CdrOp::class,
+    ConsOp::class,
+    NullOp::class
+)
+
+object ListBuiltins : OpSource {
+    override val extras: List<String>
+        get() = LIST_EXTRAS
+
+    override val buildins: List<Invokable>
+        get() = instances (LIST_BUILTINS)
+}
+
 class ListOp () : InvokableSupport ("list") {
     override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
@@ -58,25 +95,5 @@ class NullOp : InvokableSupport ("null?") {
         return BooleanValue (isNull)
     }
 }
-
-val LIST_EXTRAS = listOf (
-    "(define (cadr x) (car (cdr x)))",
-    "(define (caddr x) (car (cdr (cdr x))))",
-    "(define (cadddr x) (car (cdr (cdr (cdr x)))))",
-    "(define (mapcar f L) (if (null? L) '() (cons (f (car L)) (mapcar f (cdr L)))))",
-    "(define (reverse x) (_reverse x '()))",
-    "(define (_reverse a b) (if (null? a) b (_reverse (cdr a) (cons (car a) b))))",
-    """(define (fold-right f init seq)
-           (if (null? seq)
-               init
-               (f (car seq)
-                  (fold-right f init (cdr seq)))))""",
-    """(define (fold-left f init seq)
-           (if (null? seq)
-               init
-               (fold-left f
-                          (f init (car seq))
-                          (cdr seq))))"""
-)
 
 // EOF

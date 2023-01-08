@@ -4,6 +4,28 @@ import lispy.*
 
 data class ActivationRecord (val symbol: String, val params: ExpressionCell, var operands: ExpressionCell, val lambda: Expression)
 
+private val LAMBDA_EXTRAS = listOf (
+    "(define let* letrec)"
+)
+
+private val LAMBDA_BUILTINS = listOf (
+    DefineOp::class,
+    LambdaOp::class,
+    BeginOp::class,
+    LetOp::class,
+    LetRecOp::class,
+    SetOp::class,
+    EvalOp::class
+)
+
+object LambdaBuiltins: OpSource {
+    override val extras: List<String>
+        get() = LAMBDA_EXTRAS
+
+    override val buildins: List<Invokable>
+        get() = instances (LAMBDA_BUILTINS)
+}
+
 /**
  * Data structure for storing non-builtin functions (bound and lambdas).
  */
@@ -225,8 +247,14 @@ class SetOp : InvokableSupport ("set!") {
     }
 }
 
-val LAMBDA_EXTRAS = listOf (
-    "(define let* letrec)"
-)
+class EvalOp : InvokableSupport ("eval") {
+    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
+        if (cell.length != 1) {
+            throw IllegalArgumentException ("Expected 1 argument found ${cell.length} in ${cell}")
+        }
+        val expr = requireExpressionCell (cell.car)
+        return interp.eval (interp.eval (expr))
+    }
+}
 
 // EOF

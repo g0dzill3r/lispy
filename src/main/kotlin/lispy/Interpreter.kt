@@ -1,7 +1,6 @@
 package lispy
 
-import lispy.builtin.Builtins
-import lispy.builtin.Invokable
+import lispy.builtin.*
 import java.util.*
 
 private val DEBUG = false
@@ -16,7 +15,7 @@ private val DEBUG = false
  * Lisp interpreter here: http://nhiro.org/learn_language/LISP-on-browser.html
  */
 
-class Interpreter (val provider: Provider) {
+class Interpreter (val provider: Provider, val startTime: Long = System.currentTimeMillis()) {
     private val scopes = Stack<Scope> ()
 
     val scope: Scope
@@ -74,13 +73,26 @@ class Interpreter (val provider: Provider) {
     fun reset () {
         scopes.clear ()
         scopes.push (Scope ())
-        Builtins.ALL.forEach {
-            scope.put (it.symbol, it)
+
+        install (LambdaBuiltins)
+        install (MathBuiltins)
+        install (BooleanBuiltins)
+        install (TypeBuiltins)
+        install (CondBuiltins)
+        install (ListBuiltins)
+        install (DebugBuiltins)
+        install (TestBuiltins)
+    }
+
+    private fun install (source: OpSource) {
+        source.buildins.forEach {
+            scope.put (it.symbol, it as Expression)
         }
-        Builtins.EXTRAS.forEach {
+        source.extras.forEach {
             eval (it)
         }
     }
+
 
     fun dumpScope (scope: Scope) {
         for ((key, value) in scope.map) {
@@ -123,7 +135,8 @@ class Interpreter (val provider: Provider) {
                 }
             }
             is ExpressionCell -> evalCell (expr)
-            else -> throw IllegalStateException ("Didn't expect a ${expr::class.java}")
+            is Invokable -> expr
+            else -> throw IllegalStateException ("Didn't expect a ${expr::class.java} in ${expr}")
         }
     }
 
@@ -148,7 +161,7 @@ class Interpreter (val provider: Provider) {
                 car.invoke (cell, this)
             }
 //            is Value -> car
-            else -> throw IllegalStateException ("Expected symbol; found $car")
+            else -> throw IllegalStateException ("Expected symbol; found $car in $expr")
         }
     }
 }

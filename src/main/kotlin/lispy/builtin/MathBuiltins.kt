@@ -2,6 +2,54 @@ package lispy.builtin
 
 import lispy.*
 
+val MATH_OPS = listOf (
+    AddOp::class, MultOp::class, SubtractOp::class, DivideOp::class, ModulusOp::class,
+    EqualsOp::class, LessThanOp::class, GreaterThanOp::class, SinOp::class, CosOp::class
+)
+
+val MATH_EXTRAS = listOf (
+    "(define (even? x) (= (% x 2) 0))",
+    "(define (odd? x) (= (% x 2) 1))",
+    "(define (inc x) (+ x 1))",
+    "(define (dec x) (- x 1))",
+    "(define (cube x) (* x x x))",
+    "(define (square x) (* x x))",
+    "(define (>= x y) (or (> x y) (= x y)))",
+    "(define (<= x y) (or (< x y) (= x y)))",
+    """(define (expt b n)
+            (if (= n 0)
+                1
+                (* b (expt b (- n 1)))))""",
+    """(define (factorial n)
+            (if (= n 1)
+                1
+                (* n (factorial (- n 1)))))""",
+    "(define (zero? x) (= x 0))",
+    "(define (abs x) ((if (< x 0) - +) x))",
+    "(define (nonzero? x) (not (zero? x)))",
+    "(define (average x y) (/ (+ x y) 2))",
+    "(define (average-list L) (/ (sum L) (length L)))",
+    """(define (clamp x lo hi)
+            (cond ((< x lo) lo)
+                ((> x hi) hi)
+                (else x)))""",
+    // Aliases using unicode characters
+    "(define ≤ <=)",
+    "(define ≥ >=)",
+    "(define ÷ /)",
+    "(define (sum L) (fold-right + 0 L))",
+    "(define ∑ sum)",
+    "(define (∏ L) (fold-right * 1 L))"
+)
+
+object MathBuiltins: OpSource {
+    override val extras: List<String>
+        get() = MATH_EXTRAS
+
+    override val buildins: List<Invokable>
+        get() = instances (MATH_OPS)
+}
+
 
 abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
     protected fun coerceList (list: List<Expression>): List<Expression> {
@@ -118,6 +166,22 @@ class MultOp : MathSupport("*") {
     }
 }
 
+abstract class UnaryOp (symbol: String): MathSupport (symbol) {
+    abstract fun op (a: Int): Expression
+    abstract fun op (a: Float): Expression
+
+    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+        val coerced = coerceArgs (cell, interp, 1)
+        return if (coerced[0] is IntValue) {
+            val value = coerced[0] as IntValue
+            op (value.value)
+        } else {
+            val value = coerced[0] as FloatValue
+            op (value.value)
+        }
+    }
+}
+
 abstract class BinaryOp (symbol: String)  : MathSupport (symbol) {
     abstract fun op (a: Int, b: Int): Expression
     abstract fun op (a: Float, b: Float): Expression
@@ -156,37 +220,14 @@ class ModulusOp : BinaryOp ("%") {
     override fun op(a: Float, b: Float): Expression = FloatValue (a % b)
 }
 
-val MATH_EXTRAS = listOf (
-    "(define (even? x) (= (% x 2) 0))",
-    "(define (odd? x) (= (% x 2) 1))",
-    "(define (inc x) (+ x 1))",
-    "(define (dec x) (- x 1))",
-    "(define (cube x) (* x x x))",
-    "(define (square x) (* x x))",
-    "(define (>= x y) (or (> x y) (= x y)))",
-    "(define (<= x y) (or (< x y) (= x y)))",
-    """(define (expt b n)
-            (if (= n 0)
-                1
-                (* b (expt b (- n 1)))))""",
-    """(define (factorial n)
-            (if (= n 1)
-                1
-                (* n (factorial (- n 1)))))""",
-    "(define (zero? x) (= x 0))",
-    "(define (abs x) ((if (< x 0) - +) x))",
-    "(define (nonzero? x) (not (zero? x)))",
-    "(define (average x y) (/ (+ x y) 2))",
-    "(define (average-list L) (/ (sum L) (length L)))",
-    """(define (clamp x lo hi)
-            (cond ((< x lo) lo)
-                ((> x hi) hi)
-                (else x)))""",
-    // Aliases using unicode characters
-    "(define ≤ <=)",
-    "(define ≥ >=)",
-    "(define ÷ /)",
-    "(define (sum L) (fold-right + 0 L))",
-    "(define ∑ sum)",
-    "(define (∏ L) (fold-right * 1 L))"
-)
+class SinOp: UnaryOp ("sin") {
+    override fun op(a: Int): Expression = op (a.toFloat ())
+    override fun op(a: Float): Expression = FloatValue (Math.sin (a.toDouble ()).toFloat())
+}
+
+class CosOp : UnaryOp ("cos") {
+    override fun op(a: Int): Expression = op (a.toFloat ())
+    override fun op(a: Float): Expression = FloatValue (Math.cos (a.toDouble ()).toFloat ())
+}
+
+// EOF
