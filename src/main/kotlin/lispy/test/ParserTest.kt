@@ -1,6 +1,6 @@
 package lispy.test
 
-import lispy.Pair
+import lispy.ConsPair
 import lispy.ProviderFactory
 import lispy.interpreter
 
@@ -17,9 +17,6 @@ fun main () {
         val exprs = parser.parseMany (it)
         exprs.forEach {
             println (it)
-            if (it is Pair) {
-                println (it.toBrackets())
-            }
         }
         true
     }

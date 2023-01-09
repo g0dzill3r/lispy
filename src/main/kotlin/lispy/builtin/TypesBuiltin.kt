@@ -28,53 +28,53 @@ object TypeBuiltins : OpSource {
 }
 
 class IsBooleanOp : InvokableSupport ("boolean?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is BooleanValue)
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is BooleanValue)
 }
 
 class IsStringOp: InvokableSupport ("string?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is StringValue)
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is StringValue)
 }
 
 class IsSymbolOp: InvokableSupport ("symbol?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is Symbol)
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is Symbol)
 }
 
 class IsProcedureOp: InvokableSupport ("procedure?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is Invokable)
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is Invokable)
 }
 
 class IsNumberOp: InvokableSupport ("number?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = interp.eval (cell.car)
         return BooleanValue (eval is IntValue || eval is FloatValue)
     }
 }
 
 class IsCharacterOp: InvokableSupport ("character?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         TODO("Unsupported")
     }
 }
 
 class IsVectorOp: InvokableSupport ("vector?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         TODO("Unsupported")
     }
 }
 
 class IsPairOp: InvokableSupport ("pair?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         if (cell.length != 1) {
             throw IllegalArgumentException ("Expected 1 argument found ${cell.length} in ${cell}")
         }
         val eval = interp.eval (cell.car)
         return when (eval) {
-            is Pair -> BooleanValue (eval.car != NilValue)
+            is ConsPair -> BooleanValue (eval.car != NilValue)
             else -> BooleanValue.FALSE
          }
     }
 }
 
 class IsListOp: InvokableSupport ("list?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is Pair)
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = BooleanValue (interp.eval (cell.car) is ConsPair)
 }

@@ -151,7 +151,7 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
                     else -> StringValue ("${value::class.simpleName}:${value}")
                 }
             }
-            is Pair -> evalCell (expr)
+            is ConsPair -> evalCell (expr)
             is Invokable -> expr
             else -> throw IllegalStateException ("Didn't expect a ${expr::class.java} in ${expr}")
         }
@@ -161,9 +161,9 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
      * Used to invoke a procedure.
      */
 
-    private fun evalCell (expr: Pair): Expression {
-        if (expr.car == NilValue || expr.car == Pair.NIL) {
-            return Pair.NIL
+    private fun evalCell (expr: ConsPair): Expression {
+        if (expr.car == NilValue || expr.car == ConsPair.NIL) {
+            return ConsPair.NIL
         }
         if (expr.car == NilValue) {
             throw IllegalStateException ("Cannot evaluate ${expr}")
@@ -174,8 +174,8 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
         }
         return when (car) {
             is Invokable -> {
-                val cell = if (expr.cdr is Pair) expr.cdr else Pair.NIL
-                car.invoke (cell as Pair, this)
+                val cell = if (expr.cdr is ConsPair) expr.cdr else ConsPair.NIL
+                car.invoke (cell as ConsPair, this)
             }
 //            is Value -> car
             else -> throw IllegalStateException ("Expected symbol; found $car in $expr")

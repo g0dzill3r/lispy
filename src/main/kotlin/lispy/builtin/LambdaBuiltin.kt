@@ -2,7 +2,7 @@ package lispy.builtin
 
 import lispy.*
 
-data class ActivationRecord (val symbol: String, val params: Pair, var operands: Pair, val lambda: Expression)
+data class ActivationRecord (val symbol: String, val params: ConsPair, var operands: ConsPair, val lambda: Expression)
 
 private val LAMBDA_EXTRAS = listOf (
     "(define let* letrec)"
@@ -29,7 +29,7 @@ object LambdaBuiltins: OpSource {
 /**
  * Data structure for storing non-builtin functions (bound and lambdas).
  */
-class BoundFunction (symbol: String, val args: Pair, val lambda: Expression) : InvokableSupport (symbol) {
+class BoundFunction (symbol: String, val args: ConsPair, val lambda: Expression) : InvokableSupport (symbol) {
     private val argList = buildList {
         args.toList ().map {
             add ((it as Symbol).symbol)
@@ -38,7 +38,7 @@ class BoundFunction (symbol: String, val args: Pair, val lambda: Expression) : I
 
     override fun toString(): String = "(lambda $args $lambda)"
 
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
 
         // Check the parameters list
 
@@ -85,13 +85,13 @@ class BoundFunction (symbol: String, val args: Pair, val lambda: Expression) : I
  */
 
 class LambdaOp : InvokableSupport ("lambda") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
-        val args = cell.car as Pair
-        val procs = cell.cdr as Pair
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
+        val args = cell.car as ConsPair
+        val procs = cell.cdr as ConsPair
         val begin = when (procs.length) {
             0 -> throw IllegalStateException ("Expected 1 or expressions, found 0")
             1 -> procs.car
-            else -> Pair(Symbol ("begin"), procs)
+            else -> ConsPair(Symbol ("begin"), procs)
         }
         return BoundFunction ("lambda", args, begin).apply {
             closure = interp.scope
@@ -109,18 +109,18 @@ class LambdaOp : InvokableSupport ("lambda") {
  */
 
 class DefineOp : InvokableSupport ("define") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val type = cell.car
 
         when (type) {
-            is Pair -> {
+            is ConsPair -> {
                 val operator = requireSymbol (type.car)
-                val args = if (type.cdr == NilValue) Pair.NIL else requirePair(type.cdr)
-                val procs = cell.cdr as Pair
+                val args = if (type.cdr == NilValue) ConsPair.NIL else requirePair(type.cdr)
+                val procs = cell.cdr as ConsPair
                 val begin = when (procs.length) {
                     0 -> throw IllegalStateException ("Expected 1 or expressions, found 0")
                     1 -> procs.car
-                    else -> Pair(Symbol ("begin"), procs)
+                    else -> ConsPair(Symbol ("begin"), procs)
                 }
 
                 val bound = BoundFunction (operator.symbol, args, begin)
@@ -148,7 +148,7 @@ class DefineOp : InvokableSupport ("define") {
  */
 
 class BeginOp : InvokableSupport ("begin") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
         return if (eval.isEmpty()) {
             NilValue
@@ -169,7 +169,7 @@ class BeginOp : InvokableSupport ("begin") {
  */
 
 class LetOp : InvokableSupport ("let") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         if (cell.length < 2) {
             throw IllegalArgumentException ("Expected 2+ arguments found ${cell.length}")
         }
@@ -179,7 +179,7 @@ class LetOp : InvokableSupport ("let") {
         val args = requirePair (cell.car)
         val map = mutableMapOf<String, Expression> ().apply {
             args.toList().forEach {
-                it as Pair
+                it as ConsPair
                 if (it.length != 2) {
                     throw IllegalStateException ("Expected 2 elements; found ${it.length}")
                 }
@@ -202,7 +202,7 @@ class LetOp : InvokableSupport ("let") {
  */
 
 class LetRecOp : InvokableSupport ("letrec") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         if (cell.length < 2) {
             throw IllegalArgumentException ("Expected 2+ arguments found ${cell.length}")
         }
@@ -214,7 +214,7 @@ class LetRecOp : InvokableSupport ("letrec") {
 
         return interp.scoped (map) {
             args.toList().forEach {
-                it as Pair
+                it as ConsPair
                 if (it.length != 2) {
                     throw IllegalStateException ("Expected 2 elements; found ${it.length}")
                 }
@@ -235,7 +235,7 @@ class LetRecOp : InvokableSupport ("letrec") {
  */
 
 class SetOp : InvokableSupport ("set!") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         if (cell.length != 2) {
             throw IllegalArgumentException ("Expected 2 arguments, found ${cell.length}")
         }
@@ -248,7 +248,7 @@ class SetOp : InvokableSupport ("set!") {
 }
 
 class EvalOp : InvokableSupport ("eval") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         if (cell.length != 1) {
             throw IllegalArgumentException ("Expected 1 argument found ${cell.length} in ${cell}")
         }

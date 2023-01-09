@@ -29,16 +29,16 @@ open class Expression {
             return this
         }
 
-    val asPair: Pair
+    val asPair: ConsPair
         get () {
-            if (this !is Pair) {
+            if (this !is ConsPair) {
                 throw IllegalArgumentException ("Not an expression cell: $this")
             }
             return this
         }
 }
 
-class Pair (var car: Expression, var cdr: Expression = NilValue) : Expression () {
+class ConsPair (var car: Expression, var cdr: Expression = NilValue) : Expression () {
     val isNil: Boolean
         get () = car == NilValue && cdr == NilValue
 
@@ -49,9 +49,9 @@ class Pair (var car: Expression, var cdr: Expression = NilValue) : Expression ()
             }
             var total = 1
             var ptr = this
-            while (ptr.cdr is Pair) {
+            while (ptr.cdr is ConsPair) {
                 total ++
-                ptr = ptr.cdr as Pair
+                ptr = ptr.cdr as ConsPair
             }
             return total
         }
@@ -63,68 +63,88 @@ class Pair (var car: Expression, var cdr: Expression = NilValue) : Expression ()
         when (cdr) {
             NIL -> Unit
             is NilValue -> Unit
-            is Pair -> (cdr as Pair).toList (list)
+            is ConsPair -> (cdr as ConsPair).toList (list)
             else -> throw IllegalStateException ("Malformed list: $cdr")
         }
         return list
     }
 
-    fun toBrackets (): String {
-        return StringBuffer ().apply {
-            if (car is NilValue) {
-                append ("[$car.$cdr]")
-            } else {
-                append ("[$car")
-                if (cdr !is NilValue) {
-                    append (", ")
-                    if (cdr is Pair) {
-                        append ((cdr as Pair).toBrackets())
-                    } else {
-                        append (cdr)
-                    }
-                }
-                append ("]")
-            }
 
-        }.toString ()
-    }
+    /**
+     *
+     */
 
-    private fun cdrToString (expr: Expression): String {
-        return if (expr is Pair) {
+    private fun cdrToString (expr: Expression, seen: MutableSet<ConsPair>): String {
+        return if (expr is ConsPair) {
             if (expr.isNil) {
-                return ""
+                ""
+            } else if (seen.contains (expr)) {
+                " ●"
+            } else if (expr.car is ConsPair) {
+                StringBuffer ().apply {
+                    append (' ')
+                    if (seen.contains (expr.car)) {
+                        append ("(●)")
+                    } else {
+                        append (cdrToString (expr.car, seen))
+                    }
+                    append (cdrToString (expr.cdr, seen))
+                }.toString ()
             } else {
-                return " ${expr.car}${cdrToString(expr.cdr)}"
+                StringBuffer ().apply {
+                    append (' ')
+                    append (expr.car)
+                    append (cdrToString (expr.cdr, seen))
+                }.toString ()
             }
         } else if (expr is NilValue) {
-            return ""
+            ""
         } else {
-            " . $expr"
+            StringBuffer ().apply {
+                append (" . ")
+                if (cdr is ConsPair) {
+                    append ((cdr as ConsPair).toString (seen))
+                } else {
+                    append (cdr)
+                }
+            }.toString ()
         }
     }
-    override fun toString(): String {
-        if (isNil) {
-            return ("()")
+
+    fun toString (seen: MutableSet<ConsPair>): String {
+        return if (seen.contains (this)) {
+            "(●)"
+        } else if (isNil) {
+            "()"
+        } else {
+            seen.add (this)
+            StringBuilder ().apply {
+                append ("(")
+                if (car is ConsPair) {
+                    append ((car as ConsPair).toString (seen))
+                } else {
+                    append (car)
+                }
+                append (cdrToString (cdr, seen))
+                append (")")
+            }.toString ()
         }
-        return StringBuilder ().apply {
-            append ("($car")
-            append (cdrToString (cdr))
-            append (")")
-        }.toString ()
     }
+
+    override fun toString (): String = toString (mutableSetOf ())
 
     companion object {
-        val NIL = Pair(NilValue, NilValue)
+        val NIL = ConsPair(NilValue, NilValue)
 
-        fun fromList (list: List<Expression>) : Pair {
+        fun fromList (list: List<Expression>) : ConsPair {
             return if (list.isEmpty ()) {
                 NIL
             } else {
                 var last: Expression = NilValue
                 for (i in list.size - 1 downTo 0) {
-                    last = Pair(list [i], last)
+                    last = ConsPair(list [i], last)
                 }
-                last as Pair
+                last as ConsPair
             }
         }
     }

@@ -59,7 +59,7 @@ fun main() {
             }
             val expr = buf.toString ()
             if (expr.isNotEmpty ()) {
-                val results = interp.eval (buf.toString()) { _, result, output ->
+                interp.eval (buf.toString()) { _, result, output ->
                     if (output.isNotEmpty()) {
                         println (output.stripTrailingNewlines ())
                     }

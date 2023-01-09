@@ -97,7 +97,7 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
         }
     }
 
-    protected fun coerceArgs (cell: Pair, interp: Interpreter, expected: Int? = null): List<Expression> {
+    protected fun coerceArgs (cell: ConsPair, interp: Interpreter, expected: Int? = null): List<Expression> {
         val list = evalList (cell, interp)
         if (list.isEmpty ()) {
             throw IllegalArgumentException ("Invalid empty list.")
@@ -113,7 +113,7 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
 }
 
 class SubtractOp : MathSupport("-") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp)
         if (coerced.size == 1) {
             val value = coerced[0]
@@ -141,7 +141,7 @@ class SubtractOp : MathSupport("-") {
 }
 
 class AddOp : MathSupport("+") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp)
         return if (coerced[0] is IntValue) {
             var total = 0
@@ -161,7 +161,7 @@ class AddOp : MathSupport("+") {
 
 
 class DivideOp : MathSupport("/") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val list = coerceList (evalList(cell, interp))
         if (list.isEmpty ()) {
             throw IllegalArgumentException("Empty list found.")
@@ -184,7 +184,7 @@ class DivideOp : MathSupport("/") {
 }
 
 class MultOp : MathSupport("*") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val list = coerceList(evalList(cell, interp))
         if (list.isEmpty()) {
             throw IllegalArgumentException("Empty list found.")
@@ -208,7 +208,7 @@ abstract class UnaryOp (symbol: String): MathSupport (symbol) {
     abstract fun op (a: Int): Expression
     abstract fun op (a: Float): Expression
 
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp, 1)
         return if (coerced[0] is IntValue) {
             val value = coerced[0] as IntValue
@@ -223,7 +223,7 @@ abstract class UnaryOp (symbol: String): MathSupport (symbol) {
 abstract class BinaryOp (symbol: String)  : MathSupport (symbol) {
     abstract fun op (a: Int, b: Int): Expression
     abstract fun op (a: Float, b: Float): Expression
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp, 2)
         return if (coerced[0] is IntValue) {
             val a = coerced[0] as IntValue
@@ -269,14 +269,14 @@ class CosOp : UnaryOp ("cos") {
 }
 
 class RandOp : InvokableSupport ("rand") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         expect (cell, 0)
         return FloatValue(Math.random().toFloat())
     }
 }
 
 class SqrtOp: InvokableSupport ("sqrt") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 1)[0]
         return when (eval) {
             is IntValue -> FloatValue (Math.sqrt (eval.value.toDouble ()).toFloat())
@@ -287,7 +287,7 @@ class SqrtOp: InvokableSupport ("sqrt") {
 }
 
 class FloorOp: InvokableSupport ("floor") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
             is IntValue -> IntValue (Math.floor (arg.value.toDouble()).toInt())
@@ -298,7 +298,7 @@ class FloorOp: InvokableSupport ("floor") {
 }
 
 class CeilOp: InvokableSupport ("ceil") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
             is IntValue -> IntValue (Math.ceil (arg.value.toDouble()).toInt ())
@@ -309,7 +309,7 @@ class CeilOp: InvokableSupport ("ceil") {
 }
 
 class RoundOp: InvokableSupport ("round") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
             is IntValue -> IntValue (Math.round (arg.value.toFloat ()).toInt ())
@@ -320,7 +320,7 @@ class RoundOp: InvokableSupport ("round") {
 }
 
 class IntOp: InvokableSupport ("->int") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
             is IntValue -> arg
@@ -331,7 +331,7 @@ class IntOp: InvokableSupport ("->int") {
 }
 
 class FloatOp: InvokableSupport ("->float") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
             is IntValue -> FloatValue (arg.value.toFloat ())

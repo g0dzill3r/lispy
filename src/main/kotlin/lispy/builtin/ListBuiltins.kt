@@ -83,20 +83,20 @@ object ListBuiltins : OpSource {
 }
 
 class ListOp () : InvokableSupport ("list") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
-        return Pair.fromList (eval)
+        return ConsPair.fromList (eval)
     }
 }
 
 class CarOp () : InvokableSupport ("car") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
         if (eval.size != 1) {
             throw IllegalArgumentException ("Expected 1 argument; found ${eval.size}")
         }
         val arg = eval[0]
-        if (arg !is Pair) {
+        if (arg !is ConsPair) {
             throw IllegalArgumentException ("Invalid argument type for car: ${eval::class.simpleName}")
         }
         return arg.car
@@ -104,13 +104,13 @@ class CarOp () : InvokableSupport ("car") {
 }
 
 class CdrOp () : InvokableSupport ("cdr") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
         if (eval.size != 1) {
             throw IllegalArgumentException ("Expected 1 argument; found ${eval.size}")
         }
         val arg = eval[0]
-        if (arg !is Pair) {
+        if (arg !is ConsPair) {
             throw IllegalArgumentException ("Invalid argument type for car: ${eval::class.simpleName}")
         }
         return arg.cdr
@@ -118,28 +118,28 @@ class CdrOp () : InvokableSupport ("cdr") {
 }
 
 class ConsOp () : InvokableSupport ("cons") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
         if (eval.size != 2) {
             throw IllegalArgumentException ("Invalid argument count; expected 2 found ${eval.size}")
         }
-        return Pair(eval[0], eval[1])
+        return ConsPair(eval[0], eval[1])
     }
 }
 
 class NullOp : InvokableSupport ("null?") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
         if (eval.size != 1) {
             throw IllegalArgumentException ("Expected 1 argument; found ${eval.size}")
         }
-        val isNull = eval[0] == Pair.NIL || eval[0] == NilValue
+        val isNull = eval[0] == ConsPair.NIL || eval[0] == NilValue
         return BooleanValue (isNull)
     }
 }
 
 class SetCarOp: InvokableSupport ("set-car!") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 2)
         val pair = requirePair (eval[0])
         pair.car = eval[1]
@@ -150,7 +150,7 @@ class SetCarOp: InvokableSupport ("set-car!") {
 }
 
 class SetCdrOp: InvokableSupport ("set-cdr!") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 2)
         val pair = requirePair (eval[0])
         pair.cdr = eval[1]
@@ -159,7 +159,7 @@ class SetCdrOp: InvokableSupport ("set-cdr!") {
 }
 
 class AppendOp: InvokableSupport ("append") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
         if (eval.size != 2) {
             throw IllegalArgumentException ("Expected 2 arguments found ${eval.size} in ${cell}")
@@ -168,7 +168,7 @@ class AppendOp: InvokableSupport ("append") {
         val list = mutableListOf<Expression> ()
         list.addAll (a.asPair.toList ())
         list.addAll (b.asPair.toList ())
-        return Pair.fromList (list)
+        return ConsPair.fromList (list)
     }
 }
 
@@ -177,19 +177,19 @@ class AppendOp: InvokableSupport ("append") {
  */
 
 class ListTailOp : InvokableSupport("list-tail") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 2)
         val (list, index) = eval
         val sublist = buildList {
             val els = list.asPair.toList ()
             addAll (els.subList (index.asInt.value, els.size))
         }
-        return Pair.fromList (sublist)
+        return ConsPair.fromList (sublist)
     }
 }
 
 class ListRefOp: InvokableSupport ("list-ref") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 2)
         val (list, index) = eval
         return list.asPair.toList ()[index.asInt.value]

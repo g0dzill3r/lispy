@@ -2,7 +2,7 @@ package lispy.builtin
 
 import lispy.BooleanValue
 import lispy.Expression
-import lispy.Pair
+import lispy.ConsPair
 import lispy.Interpreter
 import kotlin.reflect.KClass
 
@@ -29,7 +29,7 @@ fun <T: Invokable> instances (types: List<KClass<out T>>): List<T> {
 }
 
 class AndOp : InvokableSupport ("and") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         var eval: Expression = BooleanValue.FALSE
         cell.toList ().forEach {
             eval = interp.eval (it)
@@ -42,9 +42,9 @@ class AndOp : InvokableSupport ("and") {
 }
 
 class OrOp : InvokableSupport ("or") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         cell.toList ().forEach {
-            val eval = if (it is Pair) {
+            val eval = if (it is ConsPair) {
                 interp.eval (it)
             } else {
                 it
@@ -63,7 +63,7 @@ class OrOp : InvokableSupport ("or") {
 }
 
 class NotOp : InvokableSupport ("not") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val list = evalList (cell, interp)
         if (list.size != 1) {
             throw IllegalStateException ("Expected 1 argument; found ${list.size} in $cell")

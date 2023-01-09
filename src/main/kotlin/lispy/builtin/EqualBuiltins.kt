@@ -24,7 +24,7 @@ object EqualBuiltins : OpSource {
  */
 
 class EqOp : InvokableSupport ("eq?") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 2)
         val (a, b) = eval
         return BooleanValue (a.equals (b))
@@ -38,7 +38,7 @@ class EqOp : InvokableSupport ("eq?") {
  */
 
 class EqualOp : InvokableSupport ("equal?") {
-    private fun equal (c1: Pair, c2: Pair): Boolean {
+    private fun equal (c1: ConsPair, c2: ConsPair): Boolean {
         if (c1.length != c2.length) {
             return false
         }
@@ -48,12 +48,12 @@ class EqualOp : InvokableSupport ("equal?") {
             if (! equal (p1.car, p2.car)) {
                 return false
             }
-            if (p1.cdr is Pair) {
-                if (p2.cdr !is Pair) {
+            if (p1.cdr is ConsPair) {
+                if (p2.cdr !is ConsPair) {
                     return false
                 }
-                p1 = p1.cdr as Pair
-                p2 = p2.cdr as Pair
+                p1 = p1.cdr as ConsPair
+                p2 = p2.cdr as ConsPair
             } else {
                 return equal (p1.cdr, p2.cdr)
             }
@@ -62,8 +62,8 @@ class EqualOp : InvokableSupport ("equal?") {
 
     private fun equal (c1: Expression, c2: Expression): Boolean {
         return if (c1::class == c2::class) {
-            if (c1 is Pair) {
-                equal (c1, c2 as Pair)
+            if (c1 is ConsPair) {
+                equal (c1, c2 as ConsPair)
             } else {
                c1 == c2
             }
@@ -72,7 +72,7 @@ class EqualOp : InvokableSupport ("equal?") {
         }
     }
 
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 2)
         val (a, b) = eval
         return BooleanValue (equal (a, b))

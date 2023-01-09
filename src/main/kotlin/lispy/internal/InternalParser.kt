@@ -32,19 +32,19 @@ class InternalParser (val lexer: Lexer) : Parser {
         }
         val next = iter.next ()
         return when (next) {
-            is Token.Nil -> Pair.NIL
+            is Token.Nil -> ConsPair.NIL
             is Token.Integer -> IntValue (next.value)
             is Token.Float -> FloatValue (next.value)
             is Token.Bool -> BooleanValue (next.value)
             is Token.Symbol -> Symbol (next.symbol)
             is Token.QuotedString -> StringValue (next.string)
             is Token.Quote -> {
-                Pair(Symbol ("quote"), Pair(parseExpression (iter)))
+                ConsPair(Symbol ("quote"), ConsPair(parseExpression (iter)))
             }
             is Token.LeftParen -> {
                 if (iter.peek () is Token.RightParen) {
                     iter.next ()
-                    Pair.NIL
+                    ConsPair.NIL
                 } else {
                     parseList (iter)
                 }
@@ -68,7 +68,7 @@ class InternalParser (val lexer: Lexer) : Parser {
             val next = iter.peek ()
             if (next is Token.RightParen) {
                 iter.next ()
-                return Pair.fromList(list)
+                return ConsPair.fromList(list)
             }
 
             // Handle the special case of the dotted cell notation (e.g., ( 1 . 2)).
@@ -78,7 +78,7 @@ class InternalParser (val lexer: Lexer) : Parser {
                     throw IllegalStateException ("Invalid dot placement; expected 1 prior expresion found ${list.size}")
                 }
                 iter.next ()
-                val cell = Pair(list[0], parseExpression (iter))
+                val cell = ConsPair(list[0], parseExpression (iter))
                 expect<Token.RightParen> (iter)
                 return cell
             }

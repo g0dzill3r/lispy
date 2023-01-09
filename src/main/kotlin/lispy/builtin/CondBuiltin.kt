@@ -22,7 +22,7 @@ object CondBuiltins : OpSource {
  */
 
 class IfOp : InvokableSupport ("if") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val list = cell.toList ()
         if (list.size != 3) {
             throw IllegalArgumentException ("Expected 3 arguments found ${list.size} in $cell")
@@ -41,20 +41,23 @@ class IfOp : InvokableSupport ("if") {
  */
 
 class CondOp : InvokableSupport ("cond") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         cell.toList ().forEach { pair ->
             val sublist = requirePair (pair).toList ()
-            if (sublist.size != 2) {
-                throw IllegalArgumentException ("Expected 2 arguments found ${sublist.size} in $sublist")
+            if (sublist.size < 2) {
+                throw IllegalArgumentException ("Expected 2+ arguments found ${sublist.size} in $sublist")
             }
-
             val result = if (sublist [0] is Symbol && (sublist [0] as Symbol).symbol == "else") {
                 BooleanValue.TRUE
             } else {
                 interp.eval (sublist [0])
             }
             if (result != BooleanValue.FALSE) {
-                return interp.eval (sublist[1])
+                var result: Expression = NilValue
+                for (i in 1 until sublist.size) {
+                    result =  interp.eval (sublist [i])
+                }
+                return result
             }
         }
         return NilValue

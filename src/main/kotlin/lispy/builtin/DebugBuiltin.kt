@@ -26,7 +26,7 @@ object DebugBuiltins : OpSource {
 }
 
 class ScopeOp : InvokableSupport ("${'$'}scope") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         interp.scope.map.forEach { (key, value) ->
             println ("$key: $value")
         }
@@ -39,7 +39,7 @@ class ScopeOp : InvokableSupport ("${'$'}scope") {
  */
 
 class ResetOp : InvokableSupport ("${'$'}reset") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         interp.reset ()
         return BooleanValue.TRUE
     }
@@ -50,7 +50,7 @@ class ResetOp : InvokableSupport ("${'$'}reset") {
  */
 
 class IdentityOp : InvokableSupport ("identity") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         if (cell.length != 1) {
             throw IllegalStateException ("Expected 1 argument found ${cell.length}.")
         }
@@ -69,7 +69,7 @@ class IdentityOp : InvokableSupport ("identity") {
  */
 
 class FormatOp: InvokableSupport ("format") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp)
         if (eval.isEmpty()) {
             throw IllegalArgumentException ("Expected 1+ arguments; found ${eval.size}")
@@ -116,7 +116,7 @@ class FormatOp: InvokableSupport ("format") {
  */
 
 class StackOp : InvokableSupport ("stack?") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         println (interp.scope)
 //        val list = interp.scope.getStack ()
 //        list.forEachIndexed { i, el ->
@@ -130,11 +130,11 @@ class StackOp : InvokableSupport ("stack?") {
 }
 
 class RuntimeOp: InvokableSupport ("runtime") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression = IntValue ((System.currentTimeMillis() - interp.startTime).toInt ())
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = IntValue ((System.currentTimeMillis() - interp.startTime).toInt ())
 }
 
 class ErrorOp: InvokableSupport ("error") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 1)[0]
         throw IllegalStateException (eval.toString ())
     }

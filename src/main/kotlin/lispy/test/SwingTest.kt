@@ -30,7 +30,7 @@ fun main() {
                 }
             }.toString ()
         } catch (e: Exception) {
-            e.message ?: ""
+            "${e::class.simpleName}: ${e.message}"
         }
         println (output)
         output

@@ -28,11 +28,11 @@ object TestBuiltins : OpSource {
 }
 
 class QuoteOp : InvokableSupport("quote") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression = cell.car as Expression
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression = cell.car as Expression
 }
 
 class DisplayOp: InvokableSupport ("display") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val list = evalList (cell, interp, 1)
         interp.buffer.append (list[0])
         return NilValue
@@ -40,7 +40,7 @@ class DisplayOp: InvokableSupport ("display") {
 }
 
 class NewlineOp : InvokableSupport ("newline") {
-    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         expect (cell, 0)
         interp.buffer.append ("\n")
         return NilValue
@@ -48,17 +48,14 @@ class NewlineOp : InvokableSupport ("newline") {
 }
 
 class NoopOp : InvokableSupport("noop") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression = NilValue
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression = NilValue
 }
 
 class DumpOp : InvokableSupport ("dump") {
-    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         println ("CELL - $cell")
-        println ("BRACKETS - ${cell.toBrackets()}")
         val eval = interp.eval (cell)
-        if (eval is Pair) {
-            println ("EVAL - ${eval.toBrackets()}")
-        }
+        println (eval)
         return eval
     }
 }
