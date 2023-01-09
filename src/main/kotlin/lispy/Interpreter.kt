@@ -82,6 +82,8 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
         install (ListBuiltins)
         install (DebugBuiltins)
         install (TestBuiltins)
+        install (RationalBuiltin)
+        install (EqualBuiltins)
     }
 
     private fun install (source: OpSource) {
@@ -109,15 +111,30 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
         return
     }
 
-    /**
-     * Evaluate some number of expressions in a string
-     */
+    val buffer = StringBuffer ()
 
     fun eval (string: String): List<Expression> {
         val els = provider.parser.parseMany (string)
         return els.map {
-            eval (it)
+            it
         }
+
+    }
+
+    /**
+     * Evaluate some number of expressions in a string
+     */
+
+    fun eval (string: String, func: (input: Expression, result: Expression, output: String) -> Unit): Expression {
+        val els = provider.parser.parseMany (string)
+        var result: Expression = NilValue
+        els.forEach {
+            result = eval (it)
+            func (it, result, buffer.toString ())
+            buffer.setLength (0)
+        }
+
+        return result
     }
 
     /**
@@ -134,7 +151,7 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
                     else -> StringValue ("${value::class.simpleName}:${value}")
                 }
             }
-            is ExpressionCell -> evalCell (expr)
+            is Pair -> evalCell (expr)
             is Invokable -> expr
             else -> throw IllegalStateException ("Didn't expect a ${expr::class.java} in ${expr}")
         }
@@ -144,9 +161,9 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
      * Used to invoke a procedure.
      */
 
-    private fun evalCell (expr: ExpressionCell): Expression {
-        if (expr.car == NilValue || expr.car == ExpressionCell.NIL) {
-            return ExpressionCell.NIL
+    private fun evalCell (expr: Pair): Expression {
+        if (expr.car == NilValue || expr.car == Pair.NIL) {
+            return Pair.NIL
         }
         if (expr.car == NilValue) {
             throw IllegalStateException ("Cannot evaluate ${expr}")
@@ -157,8 +174,8 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
         }
         return when (car) {
             is Invokable -> {
-                val cell = if (expr.cdr is ExpressionCell) expr.cdr else ExpressionCell.NIL
-                car.invoke (cell, this)
+                val cell = if (expr.cdr is Pair) expr.cdr else Pair.NIL
+                car.invoke (cell as Pair, this)
             }
 //            is Value -> car
             else -> throw IllegalStateException ("Expected symbol; found $car in $expr")

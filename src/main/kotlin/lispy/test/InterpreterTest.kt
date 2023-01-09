@@ -14,11 +14,14 @@ fun main () {
     val lisp = Interpreter (provider)
 
     interpreter ("repl> ") {
-        lisp.eval (it).forEach { res ->
-            when (res) {
+        lisp.eval (it) { input, result, output ->
+            if (output.isNotEmpty()) {
+                println (output.stripTrailingNewlines ())
+            }
+            when (result) {
                 is NilValue -> Unit
-                is StringValue -> println("-> \"${res}\"")
-                else -> println("-> $res")
+                is StringValue -> println("=> \"${result}\"")
+                else -> println("=> $result")
             }
         }
         true

@@ -4,7 +4,7 @@ import lispy.*
 
 interface Invokable {
     val symbol: String
-    fun invoke (cell: ExpressionCell, interp: Interpreter): Expression
+    fun invoke (cell: Pair, interp: Interpreter): Expression
 }
 
 abstract class InvokableSupport (override val symbol: String) : Invokable, Expression() {
@@ -23,14 +23,20 @@ abstract class InvokableSupport (override val symbol: String) : Invokable, Expre
         return
     }
 
-    fun evalList (cell: ExpressionCell, interp: Interpreter): List<Expression> {
-        val list = cell.toList ()
-        return list.map {
-            interp.eval (it)
+    fun evalList (cell: Pair, interp: Interpreter, expect: Int? = null): List<Expression> {
+        return buildList {
+            cell.toList ().map {
+                add (interp.eval (it))
+            }
+            expect?.let {
+                if (this.size != expect) {
+                    throw IllegalArgumentException ("Expected $expect arguments found ${this.size} in $cell.")
+                }
+            }
         }
     }
 
-    fun expect (cell: ExpressionCell, count: Int): List<Expression> {
+    fun expect (cell: Pair, count: Int): List<Expression> {
         val list = cell.toList ()
         if (list.size != count) {
             throw IllegalArgumentException ("Expected $count arguments; found ${list.size} in ${cell}")
@@ -51,8 +57,8 @@ abstract class InvokableSupport (override val symbol: String) : Invokable, Expre
         }
         return expr
     }
-    fun requireExpressionCell (expr: Expression) : ExpressionCell {
-        if (expr !is ExpressionCell) {
+    fun requirePair (expr: Expression) : Pair {
+        if (expr !is Pair) {
             throw IllegalArgumentException ("Not an expression cell: $expr")
         }
         return expr

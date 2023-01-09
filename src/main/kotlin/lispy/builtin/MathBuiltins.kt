@@ -4,7 +4,9 @@ import lispy.*
 
 val MATH_OPS = listOf (
     AddOp::class, MultOp::class, SubtractOp::class, DivideOp::class, ModulusOp::class,
-    EqualsOp::class, LessThanOp::class, GreaterThanOp::class, SinOp::class, CosOp::class
+    EqualsOp::class, LessThanOp::class, GreaterThanOp::class, SinOp::class, CosOp::class,
+    RandOp::class, SqrtOp::class,
+    FloorOp::class, CeilOp::class, RoundOp::class, IntOp::class, FloatOp::class
 )
 
 val MATH_EXTRAS = listOf (
@@ -33,13 +35,29 @@ val MATH_EXTRAS = listOf (
             (cond ((< x lo) lo)
                 ((> x hi) hi)
                 (else x)))""",
+    """(define (gcd a b) 
+      (if (> b a)
+        (gcd b a)
+        (let ((rem (% a b)))
+          (if (= rem 0) 
+            b
+            (gcd b rem)
+          )
+        )
+      )
+    )""",
     // Aliases using unicode characters
     "(define ≤ <=)",
     "(define ≥ >=)",
     "(define ÷ /)",
     "(define (sum L) (fold-right + 0 L))",
     "(define ∑ sum)",
-    "(define (∏ L) (fold-right * 1 L))"
+    "(define (∏ L) (fold-right * 1 L))",
+    """
+        (define (random a b) 
+          (->int (floor (+ a (* (rand) (+ 1 (- b a))))))
+        )
+     """
 )
 
 object MathBuiltins: OpSource {
@@ -57,7 +75,7 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
         val floatCount = list.count { it is FloatValue }
         return if (intCount + floatCount != list.size) {
             list.forEachIndexed { i, v -> println ("$i: $v") }
-            throw IllegalArgumentException ("Arguments must be int or float values.")
+            throw IllegalArgumentException ("Arguments must be int or float values: $list")
         } else if (intCount == list.size) {
             list
         } else {
@@ -79,7 +97,7 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
         }
     }
 
-    protected fun coerceArgs (cell: ExpressionCell, interp: Interpreter, expected: Int? = null): List<Expression> {
+    protected fun coerceArgs (cell: Pair, interp: Interpreter, expected: Int? = null): List<Expression> {
         val list = evalList (cell, interp)
         if (list.isEmpty ()) {
             throw IllegalArgumentException ("Invalid empty list.")
@@ -95,7 +113,7 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
 }
 
 class SubtractOp : MathSupport("-") {
-    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke (cell: Pair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp)
         if (coerced.size == 1) {
             val value = coerced[0]
@@ -122,21 +140,8 @@ class SubtractOp : MathSupport("-") {
     }
 }
 
-class DivideOp : MathSupport("/") {
-    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = evalList (cell, interp).map { asFloat (it) }
-        var total = list[0].value
-
-        for (i in 1 until list.size) {
-            total /= list[i].value
-        }
-
-        return FloatValue (total)
-    }
-}
-
 class AddOp : MathSupport("+") {
-    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke (cell: Pair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp)
         return if (coerced[0] is IntValue) {
             var total = 0
@@ -153,16 +158,49 @@ class AddOp : MathSupport("+") {
         }
     }
 }
-class MultOp : MathSupport("*") {
-    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = evalList (cell, interp).map { asFloat (it) }
-        var total = 1.0f
 
-        for (i in list.indices) {
-            total *= list[i].value
+
+class DivideOp : MathSupport("/") {
+    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+        val list = coerceList (evalList(cell, interp))
+        if (list.isEmpty ()) {
+            throw IllegalArgumentException("Empty list found.")
         }
 
-        return FloatValue (total)
+        val first = list[0]
+        return if (first is IntValue) {
+            IntValue (list.subList (1, list.size).fold (first.value) { acc, value ->
+                value as IntValue
+                acc / value.value
+            })
+        } else {
+            val initial = (first as FloatValue).value
+            FloatValue (list.subList (1, list.size).fold (first.value) { acc, value ->
+                value as FloatValue
+                acc / value.value
+            })
+        }
+    }
+}
+
+class MultOp : MathSupport("*") {
+    override fun invoke (cell: Pair, interp: Interpreter): Expression {
+        val list = coerceList(evalList(cell, interp))
+        if (list.isEmpty()) {
+            throw IllegalArgumentException("Empty list found.")
+        }
+
+        return if (list[0] is IntValue) {
+            IntValue (list.fold (1) { acc, value ->
+                value as IntValue
+                acc * value.value
+            })
+        } else {
+            FloatValue (list.fold (1.0f) { acc, value ->
+                value as FloatValue
+                acc * value.value
+            })
+        }
     }
 }
 
@@ -170,7 +208,7 @@ abstract class UnaryOp (symbol: String): MathSupport (symbol) {
     abstract fun op (a: Int): Expression
     abstract fun op (a: Float): Expression
 
-    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp, 1)
         return if (coerced[0] is IntValue) {
             val value = coerced[0] as IntValue
@@ -185,7 +223,7 @@ abstract class UnaryOp (symbol: String): MathSupport (symbol) {
 abstract class BinaryOp (symbol: String)  : MathSupport (symbol) {
     abstract fun op (a: Int, b: Int): Expression
     abstract fun op (a: Float, b: Float): Expression
-    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp, 2)
         return if (coerced[0] is IntValue) {
             val a = coerced[0] as IntValue
@@ -228,6 +266,80 @@ class SinOp: UnaryOp ("sin") {
 class CosOp : UnaryOp ("cos") {
     override fun op(a: Int): Expression = op (a.toFloat ())
     override fun op(a: Float): Expression = FloatValue (Math.cos (a.toDouble ()).toFloat ())
+}
+
+class RandOp : InvokableSupport ("rand") {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        expect (cell, 0)
+        return FloatValue(Math.random().toFloat())
+    }
+}
+
+class SqrtOp: InvokableSupport ("sqrt") {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        val eval = evalList (cell, interp, 1)[0]
+        return when (eval) {
+            is IntValue -> FloatValue (Math.sqrt (eval.value.toDouble ()).toFloat())
+            is FloatValue -> FloatValue (Math.sqrt (eval.value.toDouble ()).toFloat())
+            else -> throw IllegalArgumentException ("Invalid type: ${eval::class.simpleName} of ${cell.car}")
+        }
+    }
+}
+
+class FloorOp: InvokableSupport ("floor") {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        val arg = evalList (cell, interp, 1)[0]
+        return when (arg) {
+            is IntValue -> IntValue (Math.floor (arg.value.toDouble()).toInt())
+            is FloatValue -> FloatValue (Math.floor (arg.value.toDouble()).toFloat ())
+            else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
+        }
+    }
+}
+
+class CeilOp: InvokableSupport ("ceil") {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        val arg = evalList (cell, interp, 1)[0]
+        return when (arg) {
+            is IntValue -> IntValue (Math.ceil (arg.value.toDouble()).toInt ())
+            is FloatValue -> FloatValue (Math.ceil (arg.value.toDouble()).toFloat())
+            else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
+        }
+    }
+}
+
+class RoundOp: InvokableSupport ("round") {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        val arg = evalList (cell, interp, 1)[0]
+        return when (arg) {
+            is IntValue -> IntValue (Math.round (arg.value.toFloat ()).toInt ())
+            is FloatValue -> FloatValue (Math.round (arg.value.toFloat ()).toFloat ())
+            else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
+        }
+    }
+}
+
+class IntOp: InvokableSupport ("->int") {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        val arg = evalList (cell, interp, 1)[0]
+        return when (arg) {
+            is IntValue -> arg
+            is FloatValue -> IntValue (arg.value.toInt ())
+            else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
+        }
+    }
+}
+
+class FloatOp: InvokableSupport ("->float") {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        val arg = evalList (cell, interp, 1)[0]
+        return when (arg) {
+            is IntValue -> FloatValue (arg.value.toFloat ())
+            is FloatValue -> arg
+            else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
+        }
+    }
+
 }
 
 // EOF

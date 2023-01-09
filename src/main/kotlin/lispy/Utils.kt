@@ -69,4 +69,12 @@ class PeekableIterator<T> (val wrapped: Iterator<T>): Iterator<T> {
     }
 }
 
+fun String.stripTrailingNewlines (): String {
+    var tmp = this
+    while (tmp.isNotEmpty () && tmp.get (tmp.length - 1) == '\n') {
+        tmp = tmp.substring (0, tmp.length - 1)
+    }
+    return tmp
+}
+
 // EOF

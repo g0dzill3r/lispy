@@ -2,9 +2,9 @@ package lispy.test
 
 import lispy.*
 
-private val make = { e1: Expression, e2: Expression -> ExpressionCell (e1, e2) }
+private val make = { e1: Expression, e2: Expression -> Pair(e1, e2) }
 
-private fun show (e: ExpressionCell) {
+private fun show (e: Pair) {
     println ("=======")
     println (e)
     println (e.toBrackets())
@@ -26,35 +26,35 @@ fun main() {
     show (c)
 
     run {
-        val a = ExpressionCell(StringValue("a"), StringValue("b"))
+        val a = Pair(StringValue("a"), StringValue("b"))
         println(a)
         println(a.toBrackets())
 
-        val b = ExpressionCell(IntValue(1), ExpressionCell(IntValue(2)))
+        val b = Pair(IntValue(1), Pair(IntValue(2)))
         println(b)
         println(b.toBrackets())
 
-        val c = ExpressionCell(IntValue(1), ExpressionCell(IntValue(2), ExpressionCell(IntValue(3))))
+        val c = Pair(IntValue(1), Pair(IntValue(2), Pair(IntValue(3))))
         println(c)
         println(c.toBrackets())
 
-        val d = ExpressionCell(ExpressionCell(IntValue(1), ExpressionCell(IntValue(2))), IntValue(3))
+        val d = Pair(Pair(IntValue(1), Pair(IntValue(2))), IntValue(3))
         println(d)
         println(d.toBrackets())
 
-        val e = ExpressionCell(ExpressionCell(IntValue(1), ExpressionCell(IntValue(2))))
+        val e = Pair(Pair(IntValue(1), Pair(IntValue(2))))
         println(e)
         println(e.toBrackets())
     }
 
     run {
-        val e1 = ExpressionCell.NIL
+        val e1 = Pair.NIL
         println ("$e1: ${e1.length}")
 
-        val e2 = ExpressionCell (Symbol ("a"))
+        val e2 = Pair(Symbol ("a"))
         println ("$e2: ${e2.length}")
 
-        val e3 = ExpressionCell (Symbol ("b"), e2)
+        val e3 = Pair(Symbol ("b"), e2)
         println ("$e3: ${e3.length}")
     }
 

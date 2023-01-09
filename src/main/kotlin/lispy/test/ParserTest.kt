@@ -1,8 +1,7 @@
 package lispy.test
 
-import lispy.ExpressionCell
+import lispy.Pair
 import lispy.ProviderFactory
-import lispy.Provider
 import lispy.interpreter
 
 /**
@@ -18,7 +17,7 @@ fun main () {
         val exprs = parser.parseMany (it)
         exprs.forEach {
             println (it)
-            if (it is ExpressionCell) {
+            if (it is Pair) {
                 println (it.toBrackets())
             }
         }

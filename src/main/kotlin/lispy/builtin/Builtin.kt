@@ -28,39 +28,35 @@ object TestBuiltins : OpSource {
 }
 
 class QuoteOp : InvokableSupport("quote") {
-    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression = cell.car as Expression
+    override fun invoke (cell: Pair, interp: Interpreter): Expression = cell.car as Expression
 }
 
 class DisplayOp: InvokableSupport ("display") {
-    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = evalList (cell, interp)
-        if (list.size != 1) {
-            throw IllegalStateException ("Expected 1 argument found ${list.size}")
-        } else {
-            print (list[0])
-        }
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        val list = evalList (cell, interp, 1)
+        interp.buffer.append (list[0])
         return NilValue
     }
 }
 
 class NewlineOp : InvokableSupport ("newline") {
-    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
-        val list = expect (cell, 0)
-        println ()
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
+        expect (cell, 0)
+        interp.buffer.append ("\n")
         return NilValue
     }
 }
 
 class NoopOp : InvokableSupport("noop") {
-    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression = NilValue
+    override fun invoke (cell: Pair, interp: Interpreter): Expression = NilValue
 }
 
 class DumpOp : InvokableSupport ("dump") {
-    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke (cell: Pair, interp: Interpreter): Expression {
         println ("CELL - $cell")
         println ("BRACKETS - ${cell.toBrackets()}")
         val eval = interp.eval (cell)
-        if (eval is ExpressionCell) {
+        if (eval is Pair) {
             println ("EVAL - ${eval.toBrackets()}")
         }
         return eval

@@ -2,12 +2,13 @@ package lispy.builtin
 
 import lispy.BooleanValue
 import lispy.Expression
-import lispy.ExpressionCell
+import lispy.Pair
 import lispy.Interpreter
 import kotlin.reflect.KClass
 
 val BOOLEAN_EXTRAS = listOf (
-    "1"
+    "(define true #t)",
+    "(define false #f)"
 )
 val BOOLEAN_BULTINS = listOf (
     AndOp::class, OrOp::class, NotOp::class
@@ -28,20 +29,12 @@ fun <T: Invokable> instances (types: List<KClass<out T>>): List<T> {
 }
 
 class AndOp : InvokableSupport ("and") {
-    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
         var eval: Expression = BooleanValue.FALSE
         cell.toList ().forEach {
-            eval = it
-            if (it is ExpressionCell) {
-                eval = interp.eval (it)
-            }
-            when (it) {
-                is BooleanValue -> {
-                    if (it == BooleanValue.FALSE) {
-                        return it
-                    }
-                }
-                else -> eval = it
+            eval = interp.eval (it)
+            if (eval == BooleanValue.FALSE) {
+                return eval
             }
         }
         return eval
@@ -49,9 +42,9 @@ class AndOp : InvokableSupport ("and") {
 }
 
 class OrOp : InvokableSupport ("or") {
-    override fun invoke (cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke (cell: Pair, interp: Interpreter): Expression {
         cell.toList ().forEach {
-            val eval = if (it is ExpressionCell) {
+            val eval = if (it is Pair) {
                 interp.eval (it)
             } else {
                 it
@@ -70,7 +63,7 @@ class OrOp : InvokableSupport ("or") {
 }
 
 class NotOp : InvokableSupport ("not") {
-    override fun invoke(cell: ExpressionCell, interp: Interpreter): Expression {
+    override fun invoke(cell: Pair, interp: Interpreter): Expression {
         val list = evalList (cell, interp)
         if (list.size != 1) {
             throw IllegalStateException ("Expected 1 argument; found ${list.size} in $cell")

@@ -1,8 +1,6 @@
 package lispy.test
 
-import lispy.Interpreter
-import lispy.NilValue
-import lispy.ProviderFactory
+import lispy.*
 import java.awt.Color
 import java.awt.Font
 import java.awt.event.KeyAdapter
@@ -18,8 +16,19 @@ fun main() {
 
     MinimalSwingApplication {
         val output = try {
-            val result = interp.eval (it)
-            result.filter { it != NilValue }.map { "-> $it" }.joinToString ("\n")
+            StringBuffer ().apply {
+                interp.eval (it) { input, result, output ->
+                    if (output.isNotEmpty()) {
+                        append (output.stripTrailingNewlines())
+                        append ("\n")
+                    }
+                    when (result) {
+                        NilValue -> Unit
+                        is StringValue -> append ("=> \"$result\"\n")
+                        else -> append ("=> $result\n")
+                    }
+                }
+            }.toString ()
         } catch (e: Exception) {
             e.message ?: ""
         }

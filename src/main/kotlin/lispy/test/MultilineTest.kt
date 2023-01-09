@@ -1,7 +1,6 @@
 package lispy.test
 
-import lispy.Interpreter
-import lispy.ProviderFactory
+import lispy.*
 
 fun main() {
     fun usage () {
@@ -60,8 +59,16 @@ fun main() {
             }
             val expr = buf.toString ()
             if (expr.isNotEmpty ()) {
-                val results = interp.eval(buf.toString())
-                println (results.map { "-> $it" }.joinToString ("\n"))
+                val results = interp.eval (buf.toString()) { _, result, output ->
+                    if (output.isNotEmpty()) {
+                        println (output.stripTrailingNewlines ())
+                    }
+                    when (result) {
+                        NilValue -> Unit
+                        is StringValue -> println ("=> \"$result\"")
+                        else -> println ("=> $result")
+                    }
+                }
             }
         }
     }

@@ -21,16 +21,24 @@ open class Expression {
             return this
         }
 
-    val asCell: ExpressionCell
+    val asInt: IntValue
         get () {
-            if (this !is ExpressionCell) {
+            if (this !is IntValue) {
+                throw IllegalArgumentException ("Not an int: $this")
+            }
+            return this
+        }
+
+    val asPair: Pair
+        get () {
+            if (this !is Pair) {
                 throw IllegalArgumentException ("Not an expression cell: $this")
             }
             return this
         }
 }
 
-class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Expression () {
+class Pair (var car: Expression, var cdr: Expression = NilValue) : Expression () {
     val isNil: Boolean
         get () = car == NilValue && cdr == NilValue
 
@@ -41,9 +49,9 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
             }
             var total = 1
             var ptr = this
-            while (ptr.cdr is ExpressionCell) {
+            while (ptr.cdr is Pair) {
                 total ++
-                ptr = ptr.cdr as ExpressionCell
+                ptr = ptr.cdr as Pair
             }
             return total
         }
@@ -55,7 +63,7 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
         when (cdr) {
             NIL -> Unit
             is NilValue -> Unit
-            is ExpressionCell -> cdr.toList (list)
+            is Pair -> (cdr as Pair).toList (list)
             else -> throw IllegalStateException ("Malformed list: $cdr")
         }
         return list
@@ -69,8 +77,8 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
                 append ("[$car")
                 if (cdr !is NilValue) {
                     append (", ")
-                    if (cdr is ExpressionCell) {
-                        append (cdr.toBrackets())
+                    if (cdr is Pair) {
+                        append ((cdr as Pair).toBrackets())
                     } else {
                         append (cdr)
                     }
@@ -82,7 +90,7 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
     }
 
     private fun cdrToString (expr: Expression): String {
-        return if (expr is ExpressionCell) {
+        return if (expr is Pair) {
             if (expr.isNil) {
                 return ""
             } else {
@@ -106,17 +114,17 @@ class ExpressionCell (val car: Expression, val cdr: Expression = NilValue) : Exp
     }
 
     companion object {
-        val NIL = ExpressionCell (NilValue, NilValue)
+        val NIL = Pair(NilValue, NilValue)
 
-        fun fromList (list: List<Expression>) : ExpressionCell {
+        fun fromList (list: List<Expression>) : Pair {
             return if (list.isEmpty ()) {
                 NIL
             } else {
                 var last: Expression = NilValue
                 for (i in list.size - 1 downTo 0) {
-                    last = ExpressionCell (list [i], last)
+                    last = Pair(list [i], last)
                 }
-                last as ExpressionCell
+                last as Pair
             }
         }
     }
