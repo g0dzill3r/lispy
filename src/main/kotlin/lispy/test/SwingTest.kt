@@ -15,25 +15,27 @@ fun main() {
     val interp = Interpreter (provider)
 
     MinimalSwingApplication {
-        val output = try {
-            StringBuffer ().apply {
-                interp.eval (it) { input, result, output ->
+        val buf = StringBuffer ()
+        try {
+            interp.eval(it) { input, result, output ->
+                try {
                     if (output.isNotEmpty()) {
-                        append (output.stripTrailingNewlines())
-                        append ("\n")
+                        buf.append (output.stripTrailingNewlines())
+                        buf.append("\n")
                     }
                     when (result) {
                         NilValue -> Unit
-                        is StringValue -> append ("=> \"$result\"\n")
-                        else -> append ("=> $result\n")
+                        is StringValue -> buf.append ("=> \"$result\"\n")
+                        else -> buf.append ("=> $result\n")
                     }
+                } catch (e: Exception) {
+
                 }
-            }.toString ()
+            }.toString()
         } catch (e: Exception) {
-            "${e::class.simpleName}: ${e.message}"
+            buf.append ("${e::class.simpleName}: ${e.message}")
         }
-        println (output)
-        output
+        buf.toString ()
     }
     return
 }
@@ -44,7 +46,7 @@ class MinimalSwingApplication (val execute: (String) -> String) {
     var output = JTextArea (10, 80)
     val status = JTextField ("")
 
-    val isValid: Boolean
+    val isExpression: Boolean
         get() {
             return try {
                 provider.parser.parseMany (input.text)
@@ -61,7 +63,15 @@ class MinimalSwingApplication (val execute: (String) -> String) {
     }
 
     private fun update () {
-        status.text = if (isValid) "Valid" else "Invalid"
+        status.apply {
+            if (isExpression) {
+                text = "⏺ Valid"
+                foreground = Color.DARK_GRAY
+            } else {
+                text = "⏺ Invalid"
+                foreground = Color.RED
+            }
+        }
     }
 
     // PRIVATE
@@ -76,37 +86,58 @@ class MinimalSwingApplication (val execute: (String) -> String) {
 
     private fun buildContent(aFrame: JFrame) {
         val panel = JPanel()
-        panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
-        panel.setBorder (EmptyBorder (10, 10, 10, 10))
+        panel.setLayout (BoxLayout (panel, BoxLayout.PAGE_AXIS))
 
-        val font = Font("Courier", Font.PLAIN, 14)
+        val textFont = Font("Courier", Font.PLAIN, 14)
 
-        input.text = "(define example '(1 2 3))"
-        input.font = font
-        input.addKeyListener(object : KeyAdapter() {
-            override fun keyReleased(e: KeyEvent?) {
-                update ()
-            }
-            override fun keyPressed(evt: KeyEvent) {
-                if (evt.isControlDown && evt.keyCode == 10) {
-                    output.text = execute (input.text)
+        // The input area
+
+        input.apply {
+            text = "(define example '(1 2 3))"
+            font = textFont
+            border = EmptyBorder(10, 10, 10, 10)
+            addKeyListener(object : KeyAdapter() {
+                override fun keyReleased(e: KeyEvent?) {
+                    update()
                 }
-            }
-        });
 
-        input.border = BorderFactory.createCompoundBorder(EmptyBorder(10, 10, 10, 10), EtchedBorder())
-        panel.add (input)
-        panel.font = font
+                override fun keyPressed(evt: KeyEvent) {
+                    if (evt.isControlDown && evt.keyCode == 10) {
+                        output.text = execute (text)
+                    }
+                }
+            });
+        }
 
-        status.background = Color (255, 255, 255)
-        status.border = EmptyBorder (0, 20, 0, 0)
-        panel.add (status)
+        // The output area
 
-        output.isEditable = false
-        output.border = BorderFactory.createCompoundBorder(EmptyBorder(10, 10, 10, 10), EtchedBorder())
-        panel.add (output)
+        output.apply {
+            isEditable = false
+            font = textFont
+            border = EmptyBorder(10, 10, 10, 10)
+        }
 
-        aFrame.contentPane.add(panel)
+        // Status area
+
+        status.apply {
+            background = Color(255, 255, 255)
+            border = EmptyBorder(0, 20, 0, 0)
+        }
+
+        // set Orientation for slider
+
+        val topPanel = JPanel ()
+        topPanel.apply {
+            layout = BoxLayout (topPanel, BoxLayout.PAGE_AXIS)
+            add (input)
+            add (status)
+        }
+
+        val splitPane = JSplitPane (SwingConstants.VERTICAL, topPanel, output)
+        splitPane.border = BorderFactory.createCompoundBorder (EmptyBorder(10, 10, 10, 10), EtchedBorder())
+        splitPane.setOrientation(SwingConstants.HORIZONTAL);
+        aFrame.contentPane.add (splitPane)
+
         return
     }
 }

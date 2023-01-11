@@ -1,7 +1,5 @@
 package scheme.unit
 
-import lispy.builtin.*
-
 object BuiltinTests: ExpressionTests {
     override val tests: List<ExpressionTest> = listOf<ExpressionTest>(
         // NoopOp
@@ -59,10 +57,7 @@ object BuiltinTests: ExpressionTests {
     )
 }
 
-fun main() {
-    val tester = ExpressionTester ()
-    tester.runTests (BuiltinTests.tests)
-    return
-}
+//fun main() = ExpressionTester.runAll (BuiltinTests.tests)
+fun main() = ExpressionTester.dumpAll (BuiltinTests.tests)
 
 // EOF

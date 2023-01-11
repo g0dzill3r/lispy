@@ -58,19 +58,7 @@ object BooleanTests : ExpressionTests {
     )
 }
 
-fun main() {
-    val tester = ExpressionTester (true)
-    // All tests
-    tester.runTests (BooleanTests.tests)
-
-    // Single test
-//    val test = T("(and #t and)", "and")
-//    val result = tester.runTest (test)
-//    println (result)
-
-    // Dump tests
-//    tester.dump (BooleanTests.tests)
-    return
-}
+fun main() = ExpressionTester.runAll (BooleanTests.tests)
+//fun main() = ExpressionTester.dumpAll (BooleanTests.tests)
 
 // EOF

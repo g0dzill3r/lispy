@@ -60,8 +60,11 @@ class UnquoteSplicingOp: InvokableSupport (UNQUOTE_SPLICING) {
 }
 
 /**
- * (define x 12345)
- * `(a b ,(list 'c x) ,@(x x x))
+ * (define x 12345) `(a b ,(list 'c x) ,@(list x x))
+ *
+ * TODO: A quasiquote form within the original datum increments the level of quasiquotation: within the quasiquote form,
+ * each unquote or unquote-splicing is preserved, but a further nested unquote or unquote-splicing escapes.
+ * Multiple nestings of quasiquote require multiple nestings of unquote or unquote-splicing to escape.
  *
  * https://docs.racket-lang.org/reference/quasiquote.html
  */
@@ -124,16 +127,25 @@ class DisplayOp: InvokableSupport ("display") {
     }
 }
 
-class NewlineOp : InvokableSupport ("newline") {
+class NewlineOp : InvokableSupport (NEWLINE) {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         expect (cell, 0)
         interp.buffer.append ("\n")
         return NilValue
     }
+
+    companion object {
+        val NEWLINE = "newline"
+    }
 }
 
-class NoopOp : InvokableSupport("noop") {
+class NoopOp : InvokableSupport(NOOP) {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression = NilValue
+
+    companion object {
+        val NOOP = "noop"
+    }
+
 }
 
 class DumpOp : InvokableSupport ("dump") {

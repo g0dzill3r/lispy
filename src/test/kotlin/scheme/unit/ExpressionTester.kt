@@ -110,6 +110,15 @@ class ExpressionTester (val debug: Boolean = false) {
 
         // NOT REACHED
     }
+
+    companion object {
+        fun runAll (tests: List<ExpressionTest>) {
+            ExpressionTester ().runTests (tests)
+        }
+        fun dumpAll (tests: List<ExpressionTest>) {
+            ExpressionTester ().dump (tests)
+        }
+    }
 }
 
 // EOF
