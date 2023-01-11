@@ -4,7 +4,7 @@ package lispy
  * The expression is the parent type of all scheme data types.
  */
 
-open class Expression {
+abstract class Expression {
     val asString: StringValue
         get () {
             if (this !is StringValue) {
@@ -36,12 +36,33 @@ open class Expression {
             }
             return this
         }
+
+    val isNil: Boolean
+        get () = this == NilValue || this == ConsPair.NIL
+
+    val isNotNil: Boolean
+        get () = ! isNil
+
+    val isPair: Boolean
+        get () = this is ConsPair
+
+    val isList: Boolean
+        get () {
+            return if (this is ConsPair) {
+                if (cdr == NilValue) {
+                    true
+                } else if (cdr is ConsPair) {
+                    cdr.isList
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        }
 }
 
 class ConsPair (var car: Expression, var cdr: Expression = NilValue) : Expression () {
-    val isNil: Boolean
-        get () = car == NilValue && cdr == NilValue
-
     val length: Int
         get () {
             if (car == NilValue) {
@@ -69,49 +90,12 @@ class ConsPair (var car: Expression, var cdr: Expression = NilValue) : Expressio
         return list
     }
 
-
     /**
-     *
+     * A [toString] implementation that is able to defeat circular structures and yield a
+     * string representation of structures.
      */
 
-    private fun cdrToString (expr: Expression, seen: MutableSet<ConsPair>): String {
-        return if (expr is ConsPair) {
-            if (expr.isNil) {
-                ""
-            } else if (seen.contains (expr)) {
-                " ●"
-            } else if (expr.car is ConsPair) {
-                StringBuffer ().apply {
-                    append (' ')
-                    if (seen.contains (expr.car)) {
-                        append ("(●)")
-                    } else {
-                        append (cdrToString (expr.car, seen))
-                    }
-                    append (cdrToString (expr.cdr, seen))
-                }.toString ()
-            } else {
-                StringBuffer ().apply {
-                    append (' ')
-                    append (expr.car)
-                    append (cdrToString (expr.cdr, seen))
-                }.toString ()
-            }
-        } else if (expr is NilValue) {
-            ""
-        } else {
-            StringBuffer ().apply {
-                append (" . ")
-                if (cdr is ConsPair) {
-                    append ((cdr as ConsPair).toString (seen))
-                } else {
-                    append (cdr)
-                }
-            }.toString ()
-        }
-    }
-
-    fun toString (seen: MutableSet<ConsPair>): String {
+    fun toString (seen: MutableList<ConsPair>): String {
         return if (seen.contains (this)) {
             "(●)"
         } else if (isNil) {
@@ -125,13 +109,56 @@ class ConsPair (var car: Expression, var cdr: Expression = NilValue) : Expressio
                 } else {
                     append (car)
                 }
-                append (cdrToString (cdr, seen))
+                var ptr = cdr
+                while (true) {
+                    if (ptr == NilValue) {
+                        break
+                    } else if (ptr !is ConsPair) {
+                        append (" . ")
+                        append (ptr)
+                        break
+                    } else if (seen.contains (ptr)) {
+                        append (" (●)")
+                        break
+                    } else {
+                        seen.add (ptr)
+                        append (" ")
+                        if (ptr.car is ConsPair) {
+                            append ((ptr.car as ConsPair).toString (seen))
+                        } else {
+                            append (ptr.car)
+                        }
+                        ptr = ptr.cdr
+                    }
+                }
                 append (")")
             }.toString ()
         }
     }
 
-    override fun toString (): String = toString (mutableSetOf ())
+    override fun toString (): String = toString (mutableListOf ())
+
+    /**
+     * Displays the physical structure of a list using the tradditional dotted notation.
+     */
+
+    fun toDottedString (): String {
+        return StringBuffer ().apply {
+            append ("(")
+            if (car is ConsPair) {
+                append ((car as ConsPair).toDottedString ())
+            } else {
+                append (car)
+            }
+            append (" . ")
+            if (cdr is ConsPair) {
+                append ((cdr as ConsPair).toDottedString ())
+            } else {
+                append (cdr)
+            }
+            append (")")
+        }.toString ()
+    }
 
     companion object {
         val NIL = ConsPair(NilValue, NilValue)
@@ -150,7 +177,8 @@ class ConsPair (var car: Expression, var cdr: Expression = NilValue) : Expressio
     }
 }
 
-open class Value : Expression ()
+abstract class Value : Expression ()
+
 object NilValue : Value () {
     override fun toString (): String = "nil"
 }
@@ -161,10 +189,10 @@ data class FloatValue (val value: Float) : Value () {
     override fun toString (): String = "$value"
 }
 data class StringValue (val value: String): Value () {
-    override fun toString (): String = value
+    override fun toString (): String = "\"$value\""
 }
 data class BooleanValue (val value: Boolean): Value () {
-    override fun toString (): String = "$value"
+    override fun toString (): String = if (value) "#t" else "#f"
 
     companion object {
         val TRUE = BooleanValue (true)

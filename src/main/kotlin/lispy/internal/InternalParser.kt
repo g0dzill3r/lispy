@@ -68,7 +68,7 @@ class InternalParser (val lexer: Lexer) : Parser {
             val next = iter.peek ()
             if (next is Token.RightParen) {
                 iter.next ()
-                return ConsPair.fromList(list)
+                return ConsPair.fromList (list)
             }
 
             // Handle the special case of the dotted cell notation (e.g., ( 1 . 2)).
@@ -78,7 +78,12 @@ class InternalParser (val lexer: Lexer) : Parser {
                     throw IllegalStateException ("Invalid dot placement; expected 1 prior expresion found ${list.size}")
                 }
                 iter.next ()
-                val cell = ConsPair(list[0], parseExpression (iter))
+                val expr = parseExpression (iter)
+                val cell = if (expr.isNil) {
+                    ConsPair (list[0])
+                } else {
+                    ConsPair (list[0], expr)
+                }
                 expect<Token.RightParen> (iter)
                 return cell
             }

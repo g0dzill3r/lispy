@@ -15,7 +15,7 @@ fun main() {
 //    make (IntValue (1), NilValue).let {
 //        show (it)
 //    }
-
+//
 //    run {
 //        val a = make(NilValue, NilValue)
 //        show(a)
@@ -30,23 +30,18 @@ fun main() {
 //    run {
 //        val a = ConsPair(StringValue("a"), StringValue("b"))
 //        println(a)
-//        println(a.toBrackets())
 //
 //        val b = ConsPair(IntValue(1), ConsPair(IntValue(2)))
 //        println(b)
-//        println(b.toBrackets())
 //
 //        val c = ConsPair(IntValue(1), ConsPair(IntValue(2), ConsPair(IntValue(3))))
 //        println(c)
-//        println(c.toBrackets())
 //
 //        val d = ConsPair(ConsPair(IntValue(1), ConsPair(IntValue(2))), IntValue(3))
 //        println(d)
-//        println(d.toBrackets())
 //
 //        val e = ConsPair(ConsPair(IntValue(1), ConsPair(IntValue(2))))
 //        println(e)
-//        println(e.toBrackets())
 //    }
 //
 //    run {
@@ -66,6 +61,9 @@ fun main() {
         val b = ConsPair (IntValue (2), a)
         val c = ConsPair (IntValue (3), b)
         val d = ConsPair (IntValue (4), c)
+//        a.cdr = d
+//        show (d)
+
         a.cdr = d
         show (d)
 
@@ -74,19 +72,6 @@ fun main() {
 
         c.cdr = d
         println (d)
-
-
-//        a.cdr = IntValue (123)
-//         println (a)
-//
-//
-//        a.cdr = a
-//        println (a)
-//
-//        val z = ConsPair.NIL
-//        z.car = z
-//        println (z)
-
     }
 
     return

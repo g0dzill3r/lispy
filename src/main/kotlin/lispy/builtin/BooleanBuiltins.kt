@@ -11,7 +11,9 @@ val BOOLEAN_EXTRAS = listOf (
     "(define false #f)"
 )
 val BOOLEAN_BULTINS = listOf (
-    AndOp::class, OrOp::class, NotOp::class
+    AndOp::class,
+    OrOp::class,
+    NotOp::class
 )
 
 object BooleanBuiltins : OpSource {
@@ -44,11 +46,7 @@ class AndOp : InvokableSupport ("and") {
 class OrOp : InvokableSupport ("or") {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         cell.toList ().forEach {
-            val eval = if (it is ConsPair) {
-                interp.eval (it)
-            } else {
-                it
-            }
+            val eval = interp.eval (it)
             when (eval) {
                 is BooleanValue -> {
                     if (eval.value) {

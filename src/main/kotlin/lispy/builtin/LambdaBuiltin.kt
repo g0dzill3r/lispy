@@ -15,7 +15,8 @@ private val LAMBDA_BUILTINS = listOf (
     LetOp::class,
     LetRecOp::class,
     SetOp::class,
-    EvalOp::class
+    EvalOp::class,
+    ApplyOp::class
 )
 
 object LambdaBuiltins: OpSource {
@@ -245,6 +246,17 @@ class SetOp : InvokableSupport ("set!") {
         scope.put (symbol.symbol, value)
         return NilValue
     }
+}
+
+class ApplyOp: InvokableSupport ("apply") {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
+        val (func, args) = evalList (cell, interp, 2)
+        if (func !is Invokable) {
+            throw IllegalArgumentException ("Not invokable: ${func}")
+        }
+        return func.invoke (args as ConsPair, interp)
+    }
+
 }
 
 class EvalOp : InvokableSupport ("eval") {

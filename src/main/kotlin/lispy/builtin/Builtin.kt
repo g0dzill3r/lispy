@@ -29,6 +29,10 @@ object TestBuiltins : OpSource {
 
 class QuoteOp : InvokableSupport("quote") {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression = cell.car as Expression
+
+    companion object {
+        fun quote (expression: Expression) = ConsPair (Symbol ("quote"), ConsPair (expression))
+    }
 }
 
 class DisplayOp: InvokableSupport ("display") {

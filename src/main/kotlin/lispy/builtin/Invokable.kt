@@ -8,7 +8,7 @@ interface Invokable {
 }
 
 abstract class InvokableSupport (override val symbol: String) : Invokable, Expression() {
-    override fun toString(): String = "builtin:$symbol"
+    override fun toString (): String = "builtin:$symbol"
 
     val isBuiltin: Boolean
         get () = closure == null

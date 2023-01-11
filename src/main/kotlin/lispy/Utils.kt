@@ -36,6 +36,15 @@ fun <T, S> Stack<T>.push (t: T, func: () -> S): S {
     }
 }
 
+/**
+ *
+ */
+
+fun stringBuilder (func: StringBuffer.() -> Unit): String {
+    return StringBuffer ().apply {
+        func ()
+    }.toString ()
+}
 
 /**
  * A wrapper for the Iterator<T> that allows for single look-ahead.

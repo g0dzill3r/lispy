@@ -119,11 +119,13 @@ class CdrOp () : InvokableSupport ("cdr") {
 
 class ConsOp () : InvokableSupport ("cons") {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
-        val eval = evalList (cell, interp)
-        if (eval.size != 2) {
-            throw IllegalArgumentException ("Invalid argument count; expected 2 found ${eval.size}")
+        val eval = evalList (cell, interp, 2)
+        val (cons, cdr) = eval
+        return if (cdr.isNil) {
+            ConsPair (cons)
+        } else {
+            ConsPair (cons, cdr)
         }
-        return ConsPair(eval[0], eval[1])
     }
 }
 

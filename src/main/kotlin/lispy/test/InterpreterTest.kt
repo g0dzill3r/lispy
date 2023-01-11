@@ -20,7 +20,6 @@ fun main () {
             }
             when (result) {
                 is NilValue -> Unit
-                is StringValue -> println("=> \"${result}\"")
                 else -> println("=> $result")
             }
         }

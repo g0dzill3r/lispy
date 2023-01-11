@@ -16,7 +16,10 @@ fun main () {
     interpreter ("parser[${provider.type}]> ") {
         val exprs = parser.parseMany (it)
         exprs.forEach {
-            println (it)
+            println ("toString:       $it")
+            (it as? ConsPair)?.let {
+                println ("toDottedString: ${it.toDottedString ()}")
+            }
         }
         true
     }

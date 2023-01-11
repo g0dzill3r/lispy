@@ -65,7 +65,6 @@ fun main() {
                     }
                     when (result) {
                         NilValue -> Unit
-                        is StringValue -> println ("=> \"$result\"")
                         else -> println ("=> $result")
                     }
                 }

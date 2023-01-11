@@ -16,6 +16,7 @@ private val DEBUG = false
  */
 
 class Interpreter (val provider: Provider, val startTime: Long = System.currentTimeMillis()) {
+    val buffer = StringBuffer ()
     private val scopes = Stack<Scope> ()
 
     val scope: Scope
@@ -91,10 +92,14 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
             scope.put (it.symbol, it as Expression)
         }
         source.extras.forEach {
-            eval (it)
+            try {
+                evalOne (it)
+            }
+            catch (e: Exception) {
+                throw IllegalArgumentException ("Error parsing extra: $it)", e)
+            }
         }
     }
-
 
     fun dumpScope (scope: Scope) {
         for ((key, value) in scope.map) {
@@ -111,14 +116,21 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
         return
     }
 
-    val buffer = StringBuffer ()
 
-    fun eval (string: String): List<Expression> {
-        val els = provider.parser.parseMany (string)
-        return els.map {
-            it
-        }
+    fun evalOne (str: String): Triple<Expression, Expression, String> {
+        val expression = provider.parser.parse (str)
+        return evalOne (expression)
+    }
 
+    /**
+     *
+     */
+
+    fun evalOne (expression: Expression): Triple<Expression, Expression, String> {
+        val result = eval (expression)
+        val output = buffer.toString ()
+        buffer.setLength (0)
+        return Triple (expression, result, output)
     }
 
     /**
@@ -144,13 +156,13 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
     fun eval (expr: Expression): Expression {
         return when (expr) {
             is Value -> expr
-            is Symbol -> {
-                val value = get (expr)
-                when (value) {
-                    is Expression -> value
-                    else -> StringValue ("${value::class.simpleName}:${value}")
-                }
-            }
+            is Symbol -> get (expr)
+//                val value = get (expr)
+//                when (value) {
+//                    is Expression -> value
+//                    else -> StringValue ("${value::class.simpleName}:${value}")
+//                }
+//            }
             is ConsPair -> evalCell (expr)
             is Invokable -> expr
             else -> throw IllegalStateException ("Didn't expect a ${expr::class.java} in ${expr}")

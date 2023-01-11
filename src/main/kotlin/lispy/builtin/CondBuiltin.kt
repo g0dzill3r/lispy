@@ -2,7 +2,7 @@ package lispy.builtin
 
 import lispy.*
 
-private val COND_EXTRAS = listOf ("")
+private val COND_EXTRAS = listOf<String> ()
 
 private val COND_BUILTINS = listOf (
     CondOp::class,
