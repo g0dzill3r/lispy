@@ -31,16 +31,17 @@ sealed class Token (val location: Source.Location) {
     class Nil (loc: Source.Location) : Token (loc) {
         override fun toString (): String = "nil"
     }
-
     class Dot (loc: Source.Location) : Token (loc) {
         override fun toString (): String = "dot"
     }
-
-    class Backquote (loc: Source.Location): Token (loc) {
-        override fun toString (): String = "Backquote"
+    class UnquoteSplicing (loc: Source.Location): Token (loc) {
+        override fun toString (): String = "UnquoteSplicing"
     }
-    class Comma (loc: Source.Location): Token (loc) {
-        override fun toString (): String = "Comma"
+    class Quasiquote (loc: Source.Location): Token (loc) {
+        override fun toString (): String = "Quasiquote"
+    }
+    class Unquote (loc: Source.Location): Token (loc) {
+        override fun toString (): String = "Unquote"
     }
     class Quote (loc: Source.Location): Token (loc) {
         override fun toString(): String = "Quote"
@@ -59,8 +60,9 @@ sealed class Token (val location: Source.Location) {
                 is Integer -> "${token.value}"
                 is Float -> "${token.value}"
                 is Quote -> "\'"
-                is Backquote -> "\\`"
-                is Comma -> ","
+                is Quasiquote -> "\\`"
+                is Unquote -> ","
+                is UnquoteSplicing -> ",@"
             }
         }
     }

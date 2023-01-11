@@ -17,11 +17,17 @@ class InternalLexer : Lexer {
                     ';' -> readComment (source)
                     '`' -> {
                         source.next ()
-                        yield (Token.Backquote (source.location))
+                        yield (Token.Quasiquote (source.location))
                     }
                     ',' -> {
-                        source.next ()
-                        yield (Token.Comma (source.location))
+                        if (source.hasNext (1) && source.peek (1) == '@') {
+                            source.next ()
+                            source.next ()
+                            yield (Token.UnquoteSplicing (source.location))
+                        } else {
+                            source.next ()
+                            yield (Token.Unquote (source.location))
+                        }
                     }
                     '(' -> {
                         source.next ()
@@ -46,6 +52,14 @@ class InternalLexer : Lexer {
                     '"' -> {
                         yield (readString (source))
                     }
+                    '-' -> {
+                        if (source.hasNext (1) && source.peek (1).isDigit ()) {
+                            yield(readNumeric(source))
+//                        } else (// handle non symbol) {
+                        } else {
+                            yield (readSymbol (source))
+                        }
+                    }
                     else -> {
                         yield (readSymbol (source))
                     }
@@ -61,8 +75,13 @@ class InternalLexer : Lexer {
 
     private fun readNumeric (source: Source): Token {
         val buf = StringBuffer ()
-        buf.append (source.next ())
+//        buf.append (source.next ())
         var isFloat = false
+
+        if (source.peek () == '-') {
+            buf.append ("-")
+            source.next ()
+        }
 
         while (source.hasNext ()) {
             val next = source.peek ()

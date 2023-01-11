@@ -18,7 +18,8 @@ private val TEST_BUILTINS = listOf (
     DisplayOp::class,
     NewlineOp::class,
     QuasiquoteOp::class,
-    UnquoteOp::class
+    UnquoteOp::class,
+    UnquoteSplicingOp::class
 )
 
 object TestBuiltins : OpSource {
@@ -48,19 +49,47 @@ class UnquoteOp: InvokableSupport (UNQUOTE) {
     }
 }
 
+class UnquoteSplicingOp: InvokableSupport (UNQUOTE_SPLICING) {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
+        val arg = expect (cell, 1)[0]
+        return interp.eval (arg)
+    }
+    companion object {
+        val UNQUOTE_SPLICING = "unquote-splicing"
+    }
+}
+
 /**
+ * (define x 12345)
+ * `(a b ,(list 'c x) ,@(x x x))
+ *
  * https://docs.racket-lang.org/reference/quasiquote.html
  */
 
 class QuasiquoteOp : InvokableSupport (QUASIQUOTE) {
     private fun eval (pair: ConsPair, interp: Interpreter): Expression {
         val results = mutableListOf<Expression> ()
-        pair.toList ().forEach { el ->
+        val list = pair.toList ()
+
+        list.forEachIndexed { i, el ->
             if (el is ConsPair) {
                 if (el.car == Symbol (UnquoteOp.UNQUOTE)) {
                     results.add (interp.eval (el))
+                } else if (el.car == Symbol (UnquoteSplicingOp.UNQUOTE_SPLICING)) {
+                    val eval = interp.eval (el)
+                    if (eval.isList) {
+                        results.addAll ((eval as ConsPair).toList ())
+                    } else {
+                        if (i != list.size - 1) {
+                            throw IllegalStateException ("Illegal dotted pair in non-trailing position: $eval")
+                        } else {
+                            val result = ConsPair.fromList (results)
+                            result.last.cdr = eval
+                            return result
+                        }
+                    }
                 } else {
-                    results.add (eval ((el as ConsPair), interp))
+                    results.add (eval (el, interp))
                 }
             } else {
                 results.add (el)
@@ -70,8 +99,12 @@ class QuasiquoteOp : InvokableSupport (QUASIQUOTE) {
     }
 
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
-        val list = expect (cell,1)[0] as ConsPair
-        return eval (list, interp)
+        val list = expect (cell,1)[0]
+        return if (list is ConsPair) {
+            eval (list, interp)
+        } else {
+            list
+        }
     }
     companion object {
         val QUASIQUOTE = "quasiquote"
@@ -80,8 +113,13 @@ class QuasiquoteOp : InvokableSupport (QUASIQUOTE) {
 
 class DisplayOp: InvokableSupport ("display") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
-        val list = evalList (cell, interp, 1)
-        interp.buffer.append (list[0])
+        val list = evalList (cell, interp)
+        list.forEachIndexed { i, el ->
+            if (i != 0) {
+                interp.buffer.append (' ')
+            }
+            interp.buffer.append (el)
+        }
         return NilValue
     }
 }

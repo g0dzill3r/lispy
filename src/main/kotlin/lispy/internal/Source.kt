@@ -8,7 +8,7 @@ class Source (iter: Iterator<Char>, val file: String = "input"): Iterator<Char> 
     constructor (input: String, file: String = "input"): this (input.iterator ())
 
     private val wrapped = iter
-    private var saved: Char? = null;
+    private var saved: MutableList<Char> = mutableListOf ()
 
     var row: Int = 0
         private set
@@ -22,19 +22,30 @@ class Source (iter: Iterator<Char>, val file: String = "input"): Iterator<Char> 
     val location: Location
         get () = Location (file, row, column)
 
+    fun hasNext (index: Int): Boolean {
+        while (saved.size < index + 1) {
+            if (wrapped.hasNext ()) {
+                saved.add (wrapped.next ())
+            } else {
+                return false
+            }
+        }
+        return true
+    }
+
     override fun hasNext(): Boolean {
-        return if (saved != null) {
+        return if (saved.isNotEmpty ()) {
             true
         } else {
             wrapped.hasNext ()
         }
     }
 
-    fun peek (): Char {
-        if (saved == null) {
-            saved = next ()
+    fun peek (index: Int = 0): Char {
+        while (saved.size < index + 1) {
+            saved.add (wrapped.next ())
         }
-        return saved!!
+        return saved.get (index)
     }
 
     private fun update (c: Char) {
@@ -47,10 +58,8 @@ class Source (iter: Iterator<Char>, val file: String = "input"): Iterator<Char> 
     }
 
     override fun next(): Char {
-        return if (saved != null) {
-            val tmp = saved!!
-            saved = null
-            tmp
+        return if (saved.isNotEmpty()) {
+            saved.removeAt (0)
         } else {
             val next = wrapped.next ()
             update (next)

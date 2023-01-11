@@ -12,6 +12,7 @@ private val DEBUG = false
  * Also: https://www.cs.rpi.edu/academics/courses/fall00/ai/scheme/reference/schintro-v14/schintro_56.html
  * Scheme basics: https://courses.cs.washington.edu/courses/cse341/02wi/scheme/basics.html
  * Lisp interpreter here: http://nhiro.org/learn_language/LISP-on-browser.html
+ * http://www.phyast.pitt.edu/~micheles/scheme/scheme8.html
  * Scheme interpreter: https://inst.eecs.berkeley.edu/~cs61a/fa14/assets/interpreter/scheme.html
  */
 
@@ -115,6 +116,17 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
         val output = buffer.toString ()
         buffer.setLength (0)
         return Triple (expression, result, output)
+    }
+
+    fun evalMany (exprs: List<Expression>): List<Triple<Expression, Expression, String>> {
+        return buildList {
+            exprs.forEach {
+                val result = eval (it)
+                val output = buffer.toString ()
+                buffer.setLength (0)
+                add (Triple (it, result, output))
+            }
+        }
     }
 
     /**

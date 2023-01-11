@@ -63,6 +63,15 @@ abstract class Expression {
 }
 
 class ConsPair (var car: Expression, var cdr: Expression = NilValue) : Expression () {
+    val last: ConsPair
+        get () {
+            var ptr = this
+            while (ptr.cdr is ConsPair && ptr.cdr.isNotNil) {
+                ptr = ptr.cdr as ConsPair
+            }
+            return ptr
+        }
+
     val length: Int
         get () {
             if (car == NilValue) {

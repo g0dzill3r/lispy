@@ -39,7 +39,7 @@ class ExpressionTester (val debug: Boolean = false) {
     data class ExpressionTestResult (
         val test: ExpressionTest,
         val success: Boolean,
-        val input: Expression? = null,
+        val input: List<Expression>? = null,
         val expected: Expression? = null,
         val output: Expression? = null,
         val exception: Throwable? = null
@@ -68,7 +68,7 @@ class ExpressionTester (val debug: Boolean = false) {
                             isException=${test.isException}
                         ),
                         sucess=$success,
-                        input=${render (input)},
+                        input=$input,
                         expected=${render (expected)},
                         output=${render (output)},
                         exception=$exception
@@ -83,7 +83,7 @@ class ExpressionTester (val debug: Boolean = false) {
 
     fun runTest (test: ExpressionTest): ExpressionTestResult {
         val input = try {
-            provider.parser.parse (test.expression)
+            provider.parser.parseMany (test.expression)
         } catch (e: Exception) {
             return ExpressionTestResult (test, false, exception = e)
         }
@@ -94,14 +94,14 @@ class ExpressionTester (val debug: Boolean = false) {
         }
 
         return try {
-            val (_, output, _) = interp.evalOne (input)
-            val equal = EqualOp.isEqual (output, interp.eval (expected))
+            val (_, result, _) = interp.evalMany (input).last ()
+            val equal = EqualOp.isEqual (result, interp.eval (expected))
             try {
                 val success = equal && ! test.isException
-                ExpressionTestResult (test, success, input, expected, output)
+                ExpressionTestResult (test, success, input, expected, result)
             }
             catch (e: Exception) {
-                ExpressionTestResult (test, test.isException, input, expected, output, exception = e)
+                ExpressionTestResult (test, test.isException, input, expected, result, exception = e)
             }
         }
         catch (e: Exception) {
