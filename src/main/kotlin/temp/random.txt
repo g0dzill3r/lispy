@@ -1,0 +1,17 @@
+;Xn+1 = (aXn + c) mod m
+;where X is the sequence of pseudo-random values
+;m, 0 < m  - modulus
+;a, 0 < a < m  - multiplier
+;c, 0 ≤ c < m  - increment
+;x0, 0 ≤ x0 < m  - the seed or start value
+
+
+(define (random seed)
+  (let ((a 69069) (c 1) (m 123456) (next seed))
+    (lambda ()
+      (set! next (% (+ (* next a) c) m))
+      next
+    )
+  )
+)
+

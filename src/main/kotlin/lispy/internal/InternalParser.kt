@@ -1,6 +1,9 @@
 package lispy.internal
 
 import lispy.*
+import lispy.builtin.QuasiquoteOp
+import lispy.builtin.QuoteOp
+import lispy.builtin.UnquoteOp
 
 /**
  * Implements a handwritten parser for scheme source files.
@@ -37,10 +40,10 @@ class InternalParser (val lexer: Lexer) : Parser {
             is Token.Float -> FloatValue (next.value)
             is Token.Bool -> BooleanValue (next.value)
             is Token.Symbol -> Symbol (next.symbol)
+            is Token.Comma -> ConsPair (Symbol (UnquoteOp.UNQUOTE), ConsPair (parseExpression (iter)))
+            is Token.Backquote -> ConsPair (Symbol (QuasiquoteOp.QUASIQUOTE), ConsPair (parseExpression (iter)))
             is Token.QuotedString -> StringValue (next.string)
-            is Token.Quote -> {
-                ConsPair(Symbol ("quote"), ConsPair(parseExpression (iter)))
-            }
+            is Token.Quote -> ConsPair(Symbol (QuoteOp.QUOTE), ConsPair (parseExpression (iter)))
             is Token.LeftParen -> {
                 if (iter.peek () is Token.RightParen) {
                     iter.next ()

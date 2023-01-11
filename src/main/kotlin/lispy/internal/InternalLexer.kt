@@ -11,9 +11,18 @@ class InternalLexer : Lexer {
     override fun lex (input: String) : Sequence<Token> {
         return sequence {
             val source = Source (input)
+
             while (source.hasNext ()) {
                 when (source.peek ()) {
                     ';' -> readComment (source)
+                    '`' -> {
+                        source.next ()
+                        yield (Token.Backquote (source.location))
+                    }
+                    ',' -> {
+                        source.next ()
+                        yield (Token.Comma (source.location))
+                    }
                     '(' -> {
                         source.next ()
                         yield (Token.LeftParen(source.location))

@@ -6,13 +6,13 @@ import java.util.*
 private val DEBUG = false
 
 /**
- * A simple scheme interpreter.
+ * A simple scheme interpreter written in Kotlin.
  *
  * Book at: https://web.mit.edu/6.001/6.037/sicp.pdf
  * Also: https://www.cs.rpi.edu/academics/courses/fall00/ai/scheme/reference/schintro-v14/schintro_56.html
- * Online interpreter at: https://inst.eecs.berkeley.edu/~cs61a/fa14/assets/interpreter/scheme.html
  * Scheme basics: https://courses.cs.washington.edu/courses/cse341/02wi/scheme/basics.html
  * Lisp interpreter here: http://nhiro.org/learn_language/LISP-on-browser.html
+ * Scheme interpreter: https://inst.eecs.berkeley.edu/~cs61a/fa14/assets/interpreter/scheme.html
  */
 
 class Interpreter (val provider: Provider, val startTime: Long = System.currentTimeMillis()) {
@@ -35,7 +35,7 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
                 return maybe
             }
         }
-        throw IllegalStateException ("Unknown identifier: ${symbol}")
+        throw IllegalStateException ("Unknown identifier: $symbol")
     }
 
     fun locate (symbol: Symbol): MutableMap<String, Expression> = locate (symbol.symbol)
@@ -48,7 +48,7 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
                 return maybe
             }
         }
-        throw IllegalStateException ("Unknown identifier: ${symbol}")
+        throw IllegalStateException ("Unknown identifier: $symbol")
     }
 
     fun <T> scoped (scope: Scope?, func: () -> T): T {
@@ -101,22 +101,6 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
         }
     }
 
-    fun dumpScope (scope: Scope) {
-        for ((key, value) in scope.map) {
-            println ("  $key = $value")
-        }
-        return
-    }
-
-    fun dumpScopes () {
-        for (i in scopes.indices) {
-            println ("SCOPE $i =================")
-            dumpScope (scopes[i])
-        }
-        return
-    }
-
-
     fun evalOne (str: String): Triple<Expression, Expression, String> {
         val expression = provider.parser.parse (str)
         return evalOne (expression)
@@ -157,15 +141,9 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
         return when (expr) {
             is Value -> expr
             is Symbol -> get (expr)
-//                val value = get (expr)
-//                when (value) {
-//                    is Expression -> value
-//                    else -> StringValue ("${value::class.simpleName}:${value}")
-//                }
-//            }
             is ConsPair -> evalCell (expr)
             is Invokable -> expr
-            else -> throw IllegalStateException ("Didn't expect a ${expr::class.java} in ${expr}")
+            else -> throw IllegalStateException ("Didn't expect a ${expr::class.java} in $expr")
         }
     }
 
@@ -178,18 +156,14 @@ class Interpreter (val provider: Provider, val startTime: Long = System.currentT
             return ConsPair.NIL
         }
         if (expr.car == NilValue) {
-            throw IllegalStateException ("Cannot evaluate ${expr}")
+            throw IllegalStateException ("Cannot evaluate $expr")
         }
         val car = eval (expr.car)
-        if (car == NilValue) {
-            throw IllegalStateException ("Unrecognized symbol: ${expr.car}")
-        }
         return when (car) {
             is Invokable -> {
                 val cell = if (expr.cdr is ConsPair) expr.cdr else ConsPair.NIL
                 car.invoke (cell as ConsPair, this)
             }
-//            is Value -> car
             else -> throw IllegalStateException ("Expected symbol; found $car in $expr")
         }
     }

@@ -16,7 +16,9 @@ private val TEST_BUILTINS = listOf (
     DumpOp::class,
     QuoteOp::class,
     DisplayOp::class,
-    NewlineOp::class
+    NewlineOp::class,
+    QuasiquoteOp::class,
+    UnquoteOp::class
 )
 
 object TestBuiltins : OpSource {
@@ -27,11 +29,52 @@ object TestBuiltins : OpSource {
         get() = instances(TEST_BUILTINS)
 }
 
-class QuoteOp : InvokableSupport("quote") {
+class QuoteOp : InvokableSupport (QUOTE) {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression = cell.car as Expression
 
     companion object {
+        val QUOTE = "quote"
         fun quote (expression: Expression) = ConsPair (Symbol ("quote"), ConsPair (expression))
+    }
+}
+
+class UnquoteOp: InvokableSupport (UNQUOTE) {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
+        val arg = expect (cell, 1)[0]
+        return interp.eval (arg)
+    }
+    companion object {
+        val UNQUOTE = "unquote"
+    }
+}
+
+/**
+ * https://docs.racket-lang.org/reference/quasiquote.html
+ */
+
+class QuasiquoteOp : InvokableSupport (QUASIQUOTE) {
+    private fun eval (pair: ConsPair, interp: Interpreter): Expression {
+        val results = mutableListOf<Expression> ()
+        pair.toList ().forEach { el ->
+            if (el is ConsPair) {
+                if (el.car == Symbol (UnquoteOp.UNQUOTE)) {
+                    results.add (interp.eval (el))
+                } else {
+                    results.add (eval ((el as ConsPair), interp))
+                }
+            } else {
+                results.add (el)
+            }
+        }
+        return ConsPair.fromList (results)
+    }
+
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
+        val list = expect (cell,1)[0] as ConsPair
+        return eval (list, interp)
+    }
+    companion object {
+        val QUASIQUOTE = "quasiquote"
     }
 }
 

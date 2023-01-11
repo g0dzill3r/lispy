@@ -36,6 +36,12 @@ sealed class Token (val location: Source.Location) {
         override fun toString (): String = "dot"
     }
 
+    class Backquote (loc: Source.Location): Token (loc) {
+        override fun toString (): String = "Backquote"
+    }
+    class Comma (loc: Source.Location): Token (loc) {
+        override fun toString (): String = "Comma"
+    }
     class Quote (loc: Source.Location): Token (loc) {
         override fun toString(): String = "Quote"
     }
@@ -53,6 +59,8 @@ sealed class Token (val location: Source.Location) {
                 is Integer -> "${token.value}"
                 is Float -> "${token.value}"
                 is Quote -> "\'"
+                is Backquote -> "\\`"
+                is Comma -> ","
             }
         }
     }
