@@ -11,7 +11,7 @@ import lispy.Token
 import lispy.internal.Source
 
 enum class TokenType : LixyTokenType {
-    LEFT_PAREN, RIGHT_PAREN, DOT, QUOTE, SYMBOL, STRING_START, STRING_END, ESCAPED_QUOTE, STRING_CONTENT, INT, FLOAT, WHITESPACE, QUOTED_STRING
+    LEFT_PAREN, RIGHT_PAREN, DOT, QUOTE, SYMBOL, STRING_START, STRING_END, ESCAPED_QUOTE, STRING_CONTENT, INT, DOUBlE, WHITESPACE, QUOTED_STRING
 }
 
 enum class TokenizerState : LixyStateLabel {
@@ -38,7 +38,7 @@ class LexerLixy : Lexer {
             TokenType.QUOTE -> Token.Quote(loc)
             TokenType.SYMBOL -> Token.Symbol(ltoken.string, loc)
             TokenType.INT -> Token.Integer(ltoken.string.toInt(), loc)
-            TokenType.FLOAT -> Token.Float(ltoken.string.toFloat(), loc)
+            TokenType.DOUBlE -> Token.Double (ltoken.string.toDouble (), loc)
             TokenType.QUOTED_STRING -> Token.QuotedString(ltoken.string, loc)
             else -> throw IllegalStateException("Unexpected token type: ${ltoken.tokenType}")
         }
@@ -57,7 +57,7 @@ class LexerLixy : Lexer {
                     TokenType.WHITESPACE -> Unit
                     TokenType.DOT -> yield (token)
                     TokenType.INT -> yield (token)
-                    TokenType.FLOAT -> yield (token)
+                    TokenType.DOUBlE -> yield (token)
                     TokenType.LEFT_PAREN -> yield (token)
                     TokenType.RIGHT_PAREN -> yield (token)
                     TokenType.SYMBOL -> yield (token)
@@ -93,7 +93,7 @@ class LexerLixy : Lexer {
                 anyOf(" ", "\t", "\n") isToken TokenType.WHITESPACE
                 "\'" isToken TokenType.QUOTE
                 "\"" isToken TokenType.STRING_START thenState TokenizerState.INSIDE_STRING
-                matches("[0-9]+\\.[0-9]+") isToken TokenType.FLOAT
+                matches("[0-9]+\\.[0-9]+") isToken TokenType.DOUBlE
                 matches("[0-9]+") isToken TokenType.INT
                 matches("[^ \t\n(),]+") isToken TokenType.SYMBOL
             }

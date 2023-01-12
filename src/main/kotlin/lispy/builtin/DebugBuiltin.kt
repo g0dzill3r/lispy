@@ -77,7 +77,7 @@ class FormatOp: InvokableSupport ("format") {
         val format = requireString (eval[0])
         val args = eval.subList(1, eval.size).map {
             when (it) {
-                is FloatValue -> it.value
+                is DoubleValue -> it.value
                 is IntValue -> it.value
                 is StringValue -> it.value
                 is BooleanValue -> it.value

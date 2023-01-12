@@ -52,7 +52,7 @@ class InternalParser (val lexer: Lexer) : Parser {
         return when (next) {
             is Token.Nil -> ConsPair.NIL
             is Token.Integer -> IntValue (next.value)
-            is Token.Float -> FloatValue (next.value)
+            is Token.Double -> DoubleValue (next.value)
             is Token.Bool -> BooleanValue (next.value)
             is Token.Symbol -> Symbol (next.symbol)
             is Token.Unquote -> ConsPair (Symbol (UnquoteOp.UNQUOTE), ConsPair (parseExpression (iter)))

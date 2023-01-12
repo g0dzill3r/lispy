@@ -10,8 +10,8 @@ sealed class Token (val location: Source.Location) {
     class Integer (val value: Int, loc: Source.Location) : Token (loc) {
         override fun toString() : String = "int:$value"
     }
-    class Float(val value: kotlin.Float, loc: Source.Location): Token (loc) {
-        override fun toString (): String = "float:$value"
+    class Double (val value: kotlin.Double, loc: Source.Location): Token (loc) {
+        override fun toString (): String = "double:$value"
     }
     class LeftParen (loc: Source.Location) : Token (loc) {
         override fun toString(): String = "LeftParen"
@@ -58,7 +58,7 @@ sealed class Token (val location: Source.Location) {
                 is Symbol -> token.symbol
                 is QuotedString -> "\"${token.string}\""
                 is Integer -> "${token.value}"
-                is Float -> "${token.value}"
+                is Double -> "${token.value}"
                 is Quote -> "\'"
                 is Quasiquote -> "\\`"
                 is Unquote -> ","

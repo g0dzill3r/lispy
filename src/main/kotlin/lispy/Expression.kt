@@ -194,7 +194,7 @@ object NilValue : Value () {
 data class IntValue (val value: Int) : Value () {
     override fun toString (): String = "$value"
 }
-data class FloatValue (val value: Float) : Value () {
+data class DoubleValue(val value: Double) : Value () {
     override fun toString (): String = "$value"
 }
 data class StringValue (val value: String): Value () {

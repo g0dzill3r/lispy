@@ -6,7 +6,7 @@ val MATH_OPS = listOf (
     AddOp::class, MultOp::class, SubtractOp::class, DivideOp::class, ModulusOp::class,
     EqualsOp::class, LessThanOp::class, GreaterThanOp::class, SinOp::class, CosOp::class,
     RandOp::class, SqrtOp::class,
-    FloorOp::class, CeilOp::class, RoundOp::class, IntOp::class, FloatOp::class
+    FloorOp::class, CeilOp::class, RoundOp::class, IntOp::class, DoubleOp::class
 )
 
 val MATH_EXTRAS = listOf (
@@ -72,8 +72,8 @@ object MathBuiltins: OpSource {
 abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
     protected fun coerceList (list: List<Expression>): List<Expression> {
         val intCount = list.count { it is IntValue }
-        val floatCount = list.count { it is FloatValue }
-        return if (intCount + floatCount != list.size) {
+        val doubleCount = list.count { it is DoubleValue }
+        return if (intCount + doubleCount != list.size) {
             list.forEachIndexed { i, v -> println ("$i: $v") }
             throw IllegalArgumentException ("Arguments must be int or float values: $list")
         } else if (intCount == list.size) {
@@ -81,7 +81,7 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
         } else {
             list.map {
                 if (it is IntValue) {
-                    FloatValue (it.value.toFloat())
+                    DoubleValue (it.value.toDouble ())
                 } else {
                     it
                 }
@@ -89,10 +89,10 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
         }
     }
 
-    protected fun asFloat (e: Expression): FloatValue {
+    protected fun asDouble (e: Expression): DoubleValue {
         return when (e) {
-            is FloatValue -> e
-            is IntValue -> FloatValue (e.value.toFloat ())
+            is DoubleValue -> e
+            is IntValue -> DoubleValue (e.value.toDouble ())
             else -> throw IllegalArgumentException ("Not numeric: $e")
         }
     }
@@ -119,7 +119,7 @@ class SubtractOp : MathSupport("-") {
             val value = coerced[0]
             return when (value) {
                 is IntValue -> IntValue (-value.value)
-                is FloatValue -> FloatValue (-value.value)
+                is DoubleValue -> DoubleValue (-value.value)
                 else -> throw Exception ()
             }
         }
@@ -131,11 +131,11 @@ class SubtractOp : MathSupport("-") {
             }
             IntValue (total)
         } else {
-            var total = (coerced[0] as FloatValue).value
+            var total = (coerced[0] as DoubleValue).value
             for (i in 1 until coerced.size) {
-                total -= (coerced[i] as FloatValue).value
+                total -= (coerced[i] as DoubleValue).value
             }
-            FloatValue (total)
+            DoubleValue (total)
         }
     }
 }
@@ -150,11 +150,11 @@ class AddOp : MathSupport("+") {
             }
             IntValue (total)
         } else {
-            var total = 0f
+            var total = 0.0
             for (i in coerced.indices) {
-                total += (coerced[i] as FloatValue).value
+                total += (coerced[i] as DoubleValue).value
             }
-            FloatValue (total)
+            DoubleValue (total)
         }
     }
 }
@@ -174,9 +174,9 @@ class DivideOp : MathSupport("/") {
                 acc / value.value
             })
         } else {
-            val initial = (first as FloatValue).value
-            FloatValue (list.subList (1, list.size).fold (first.value) { acc, value ->
-                value as FloatValue
+            val initial = (first as DoubleValue).value
+            DoubleValue (list.subList (1, list.size).fold (first.value) { acc, value ->
+                value as DoubleValue
                 acc / value.value
             })
         }
@@ -196,8 +196,8 @@ class MultOp : MathSupport("*") {
                 acc * value.value
             })
         } else {
-            FloatValue (list.fold (1.0f) { acc, value ->
-                value as FloatValue
+            DoubleValue (list.fold (1.0) { acc, value ->
+                value as DoubleValue
                 acc * value.value
             })
         }
@@ -206,7 +206,7 @@ class MultOp : MathSupport("*") {
 
 abstract class UnaryOp (symbol: String): MathSupport (symbol) {
     abstract fun op (a: Int): Expression
-    abstract fun op (a: Float): Expression
+    abstract fun op (a: Double): Expression
 
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp, 1)
@@ -214,7 +214,7 @@ abstract class UnaryOp (symbol: String): MathSupport (symbol) {
             val value = coerced[0] as IntValue
             op (value.value)
         } else {
-            val value = coerced[0] as FloatValue
+            val value = coerced[0] as DoubleValue
             op (value.value)
         }
     }
@@ -222,7 +222,7 @@ abstract class UnaryOp (symbol: String): MathSupport (symbol) {
 
 abstract class BinaryOp (symbol: String)  : MathSupport (symbol) {
     abstract fun op (a: Int, b: Int): Expression
-    abstract fun op (a: Float, b: Float): Expression
+    abstract fun op (a: Double, b: Double): Expression
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp, 2)
         return if (coerced[0] is IntValue) {
@@ -230,8 +230,8 @@ abstract class BinaryOp (symbol: String)  : MathSupport (symbol) {
             val b = coerced[1] as IntValue
             op (a.value, b.value)
         } else {
-            val a = coerced[0] as FloatValue
-            val b = coerced[1] as FloatValue
+            val a = coerced[0] as DoubleValue
+            val b = coerced[1] as DoubleValue
             op (a.value, b.value)
         }
     }
@@ -240,38 +240,38 @@ abstract class BinaryOp (symbol: String)  : MathSupport (symbol) {
 
 class EqualsOp : BinaryOp ("=") {
     override fun op(a: Int, b: Int): Expression = BooleanValue (a == b)
-    override fun op(a: Float, b: Float): Expression = BooleanValue (a == b)
+    override fun op(a: Double, b: Double): Expression = BooleanValue (a == b)
 }
 
 class LessThanOp : BinaryOp ("<") {
     override fun op(a: Int, b: Int): Expression = BooleanValue (a < b)
-    override fun op(a: Float, b: Float): Expression = BooleanValue (a < b)
+    override fun op(a: Double, b: Double): Expression = BooleanValue (a < b)
 }
 
 class GreaterThanOp : BinaryOp (">") {
     override fun op(a: Int, b: Int): Expression = BooleanValue (a > b)
-    override fun op(a: Float, b: Float): Expression = BooleanValue (a > b)
+    override fun op(a: Double, b: Double): Expression = BooleanValue (a > b)
 }
 
 class ModulusOp : BinaryOp ("%") {
     override fun op(a: Int, b: Int): Expression = IntValue (a % b)
-    override fun op(a: Float, b: Float): Expression = FloatValue (a % b)
+    override fun op(a: Double, b: Double): Expression = DoubleValue (a % b)
 }
 
 class SinOp: UnaryOp ("sin") {
-    override fun op(a: Int): Expression = op (a.toFloat ())
-    override fun op(a: Float): Expression = FloatValue (Math.sin (a.toDouble ()).toFloat())
+    override fun op(a: Int): Expression = op (a.toDouble ())
+    override fun op(a: Double): Expression = DoubleValue (Math.sin (a.toDouble ()))
 }
 
 class CosOp : UnaryOp ("cos") {
-    override fun op(a: Int): Expression = op (a.toFloat ())
-    override fun op(a: Float): Expression = FloatValue (Math.cos (a.toDouble ()).toFloat ())
+    override fun op(a: Int): Expression = op (a)
+    override fun op(a: Double): Expression = DoubleValue (Math.cos (a))
 }
 
 class RandOp : InvokableSupport ("rand") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         expect (cell, 0)
-        return FloatValue(Math.random().toFloat())
+        return DoubleValue (Math.random())
     }
 }
 
@@ -279,8 +279,8 @@ class SqrtOp: InvokableSupport ("sqrt") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 1)[0]
         return when (eval) {
-            is IntValue -> FloatValue (Math.sqrt (eval.value.toDouble ()).toFloat())
-            is FloatValue -> FloatValue (Math.sqrt (eval.value.toDouble ()).toFloat())
+            is IntValue -> DoubleValue (Math.sqrt (eval.value.toDouble ()))
+            is DoubleValue -> DoubleValue (Math.sqrt (eval.value))
             else -> throw IllegalArgumentException ("Invalid type: ${eval::class.simpleName} of ${cell.car}")
         }
     }
@@ -291,7 +291,7 @@ class FloorOp: InvokableSupport ("floor") {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
             is IntValue -> IntValue (Math.floor (arg.value.toDouble()).toInt())
-            is FloatValue -> FloatValue (Math.floor (arg.value.toDouble()).toFloat ())
+            is DoubleValue -> DoubleValue (Math.floor (arg.value))
             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
     }
@@ -302,7 +302,7 @@ class CeilOp: InvokableSupport ("ceil") {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
             is IntValue -> IntValue (Math.ceil (arg.value.toDouble()).toInt ())
-            is FloatValue -> FloatValue (Math.ceil (arg.value.toDouble()).toFloat())
+            is DoubleValue -> DoubleValue (Math.ceil (arg.value))
             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
     }
@@ -312,9 +312,9 @@ class RoundOp: InvokableSupport ("round") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
-            is IntValue -> IntValue (Math.round (arg.value.toFloat ()).toInt ())
-            is FloatValue -> FloatValue (Math.round (arg.value.toFloat ()).toFloat ())
-            else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
+            is IntValue -> IntValue (Math.round (arg.value.toDouble ()).toInt ()) // to long
+            is DoubleValue -> DoubleValue (Math.round (arg.value).toDouble ())// to long
+             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
     }
 }
@@ -324,18 +324,18 @@ class IntOp: InvokableSupport ("->int") {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
             is IntValue -> arg
-            is FloatValue -> IntValue (arg.value.toInt ())
+            is DoubleValue -> IntValue (arg.value.toInt ())
             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
     }
 }
 
-class FloatOp: InvokableSupport ("->float") {
+class DoubleOp: InvokableSupport ("->double") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
-            is IntValue -> FloatValue (arg.value.toFloat ())
-            is FloatValue -> arg
+            is IntValue -> DoubleValue (arg.value.toDouble())
+            is DoubleValue -> arg
             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
     }
