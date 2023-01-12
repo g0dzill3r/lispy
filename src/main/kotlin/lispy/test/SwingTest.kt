@@ -17,21 +17,23 @@ fun main() {
     MinimalSwingApplication {
         val buf = StringBuffer ()
         try {
-            interp.eval(it) { input, result, output ->
+            val exprs = provider.parser.parseMany (it)
+            exprs.forEach {
                 try {
+                    val (_, result, output) = interp.evalOne(it)
                     if (output.isNotEmpty()) {
-                        buf.append (output.stripTrailingNewlines())
+                        buf.append(output.stripTrailingNewlines())
                         buf.append("\n")
                     }
                     when (result) {
                         NilValue -> Unit
-                        is StringValue -> buf.append ("=> \"$result\"\n")
-                        else -> buf.append ("=> $result\n")
+                        is StringValue -> buf.append("=> \"$result\"\n")
+                        else -> buf.append("=> $result\n")
                     }
                 } catch (e: Exception) {
-
+                    buf.append (e.toString () + "\n")
                 }
-            }.toString()
+            }
         } catch (e: Exception) {
             buf.append ("${e::class.simpleName}: ${e.message}")
         }
@@ -85,8 +87,9 @@ class MinimalSwingApplication (val execute: (String) -> String) {
     }
 
     private fun buildContent(aFrame: JFrame) {
-        val panel = JPanel()
-        panel.setLayout (BoxLayout (panel, BoxLayout.PAGE_AXIS))
+        val panel = JPanel().apply {
+            setLayout (BoxLayout (this, BoxLayout.PAGE_AXIS))
+        }
 
         val textFont = Font("Courier", Font.PLAIN, 14)
 
@@ -126,16 +129,16 @@ class MinimalSwingApplication (val execute: (String) -> String) {
 
         // set Orientation for slider
 
-        val topPanel = JPanel ()
-        topPanel.apply {
-            layout = BoxLayout (topPanel, BoxLayout.PAGE_AXIS)
+        val topPanel = JPanel ().apply {
+            layout = BoxLayout (this, BoxLayout.PAGE_AXIS)
             add (input)
             add (status)
         }
 
-        val splitPane = JSplitPane (SwingConstants.VERTICAL, topPanel, output)
-        splitPane.border = BorderFactory.createCompoundBorder (EmptyBorder(10, 10, 10, 10), EtchedBorder())
-        splitPane.setOrientation(SwingConstants.HORIZONTAL);
+        val splitPane = JSplitPane (SwingConstants.VERTICAL, topPanel, output).apply {
+            border = BorderFactory.createCompoundBorder (EmptyBorder(10, 10, 10, 10), EtchedBorder())
+            orientation = SwingConstants.HORIZONTAL
+        }
         aFrame.contentPane.add (splitPane)
 
         return
