@@ -20,7 +20,7 @@ fun main() {
             val exprs = provider.parser.parseMany (it)
             exprs.forEach {
                 try {
-                    val (_, result, output) = interp.evalOne(it)
+                    val (_, result, output) = interp.evalOne (it)
                     if (output.isNotEmpty()) {
                         buf.append(output.stripTrailingNewlines())
                         buf.append("\n")

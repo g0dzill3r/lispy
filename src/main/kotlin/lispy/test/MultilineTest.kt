@@ -50,16 +50,20 @@ fun main() {
                 } else if (s == "c") {
                     buf.setLength (0)
                 } else {
-                    buf.append(s)
+                    buf.append (s)
                     buf.append ("\n")
                     if (isValid (buf.toString ())) {
                         break
                     }
                 }
             }
-            val expr = buf.toString ()
-            if (expr.isNotEmpty ()) {
-                interp.eval (buf.toString()) { _, result, output ->
+
+            // Execute the expressions that they provided
+
+            val exprs = provider.parser.parseMany (buf.toString ())
+            exprs.forEach {
+                try {
+                    val (_, result, output) = interp.evalOne (it)
                     if (output.isNotEmpty()) {
                         println (output.stripTrailingNewlines ())
                     }
@@ -67,6 +71,9 @@ fun main() {
                         NilValue -> Unit
                         else -> println ("=> $result")
                     }
+                }
+                catch (e: Exception) {
+                    println (e.toString ())
                 }
             }
         }
