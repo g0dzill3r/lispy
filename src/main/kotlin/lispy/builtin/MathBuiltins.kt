@@ -71,16 +71,15 @@ object MathBuiltins: OpSource {
 
 abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
     protected fun coerceList (list: List<Expression>): List<Expression> {
-        val intCount = list.count { it is IntValue }
+        val intCount = list.count { it is LongValue }
         val doubleCount = list.count { it is DoubleValue }
         return if (intCount + doubleCount != list.size) {
-            list.forEachIndexed { i, v -> println ("$i: $v") }
             throw IllegalArgumentException ("Arguments must be int or float values: $list")
         } else if (intCount == list.size) {
             list
         } else {
             list.map {
-                if (it is IntValue) {
+                if (it is LongValue) {
                     DoubleValue (it.value.toDouble ())
                 } else {
                     it
@@ -92,7 +91,7 @@ abstract class MathSupport (symbol: String) : InvokableSupport (symbol) {
     protected fun asDouble (e: Expression): DoubleValue {
         return when (e) {
             is DoubleValue -> e
-            is IntValue -> DoubleValue (e.value.toDouble ())
+            is LongValue -> DoubleValue (e.value.toDouble ())
             else -> throw IllegalArgumentException ("Not numeric: $e")
         }
     }
@@ -118,18 +117,18 @@ class SubtractOp : MathSupport("-") {
         if (coerced.size == 1) {
             val value = coerced[0]
             return when (value) {
-                is IntValue -> IntValue (-value.value)
+                is LongValue -> LongValue (-value.value)
                 is DoubleValue -> DoubleValue (-value.value)
                 else -> throw Exception ()
             }
         }
 
-        return if (coerced[0] is IntValue) {
-            var total = (coerced[0] as IntValue).value
+        return if (coerced[0] is LongValue) {
+            var total = (coerced[0] as LongValue).value
             for (i in 1 until coerced.size) {
-                total -= (coerced[i] as IntValue).value
+                total -= (coerced[i] as LongValue).value
             }
-            IntValue (total)
+            LongValue (total)
         } else {
             var total = (coerced[0] as DoubleValue).value
             for (i in 1 until coerced.size) {
@@ -143,12 +142,12 @@ class SubtractOp : MathSupport("-") {
 class AddOp : MathSupport("+") {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp)
-        return if (coerced[0] is IntValue) {
-            var total = 0
+        return if (coerced[0] is LongValue) {
+            var total = 0L
             for (i in coerced.indices) {
-                total += (coerced[i] as IntValue).value
+                total += (coerced[i] as LongValue).value
             }
-            IntValue (total)
+            LongValue (total)
         } else {
             var total = 0.0
             for (i in coerced.indices) {
@@ -168,9 +167,9 @@ class DivideOp : MathSupport("/") {
         }
 
         val first = list[0]
-        return if (first is IntValue) {
-            IntValue (list.subList (1, list.size).fold (first.value) { acc, value ->
-                value as IntValue
+        return if (first is LongValue) {
+            LongValue (list.subList (1, list.size).fold (first.value) { acc, value ->
+                value as LongValue
                 acc / value.value
             })
         } else {
@@ -190,9 +189,9 @@ class MultOp : MathSupport("*") {
             throw IllegalArgumentException("Empty list found.")
         }
 
-        return if (list[0] is IntValue) {
-            IntValue (list.fold (1) { acc, value ->
-                value as IntValue
+        return if (list[0] is LongValue) {
+            LongValue (list.fold (1) { acc, value ->
+                value as LongValue
                 acc * value.value
             })
         } else {
@@ -205,13 +204,13 @@ class MultOp : MathSupport("*") {
 }
 
 abstract class UnaryOp (symbol: String): MathSupport (symbol) {
-    abstract fun op (a: Int): Expression
+    abstract fun op (a: Long): Expression
     abstract fun op (a: Double): Expression
 
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp, 1)
-        return if (coerced[0] is IntValue) {
-            val value = coerced[0] as IntValue
+        return if (coerced[0] is LongValue) {
+            val value = coerced[0] as LongValue
             op (value.value)
         } else {
             val value = coerced[0] as DoubleValue
@@ -221,13 +220,13 @@ abstract class UnaryOp (symbol: String): MathSupport (symbol) {
 }
 
 abstract class BinaryOp (symbol: String)  : MathSupport (symbol) {
-    abstract fun op (a: Int, b: Int): Expression
+    abstract fun op (a: Long, b: Long): Expression
     abstract fun op (a: Double, b: Double): Expression
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val coerced = coerceArgs (cell, interp, 2)
-        return if (coerced[0] is IntValue) {
-            val a = coerced[0] as IntValue
-            val b = coerced[1] as IntValue
+        return if (coerced[0] is LongValue) {
+            val a = coerced[0] as LongValue
+            val b = coerced[1] as LongValue
             op (a.value, b.value)
         } else {
             val a = coerced[0] as DoubleValue
@@ -239,32 +238,32 @@ abstract class BinaryOp (symbol: String)  : MathSupport (symbol) {
 }
 
 class EqualsOp : BinaryOp ("=") {
-    override fun op(a: Int, b: Int): Expression = BooleanValue (a == b)
+    override fun op(a: Long, b: Long): Expression = BooleanValue (a == b)
     override fun op(a: Double, b: Double): Expression = BooleanValue (a == b)
 }
 
 class LessThanOp : BinaryOp ("<") {
-    override fun op(a: Int, b: Int): Expression = BooleanValue (a < b)
+    override fun op(a: Long, b: Long): Expression = BooleanValue (a < b)
     override fun op(a: Double, b: Double): Expression = BooleanValue (a < b)
 }
 
 class GreaterThanOp : BinaryOp (">") {
-    override fun op(a: Int, b: Int): Expression = BooleanValue (a > b)
+    override fun op(a: Long, b: Long): Expression = BooleanValue (a > b)
     override fun op(a: Double, b: Double): Expression = BooleanValue (a > b)
 }
 
 class ModulusOp : BinaryOp ("%") {
-    override fun op(a: Int, b: Int): Expression = IntValue (a % b)
+    override fun op(a: Long, b: Long): Expression = LongValue (a % b)
     override fun op(a: Double, b: Double): Expression = DoubleValue (a % b)
 }
 
 class SinOp: UnaryOp ("sin") {
-    override fun op(a: Int): Expression = op (a.toDouble ())
+    override fun op(a: Long): Expression = op (a.toDouble ())
     override fun op(a: Double): Expression = DoubleValue (Math.sin (a.toDouble ()))
 }
 
 class CosOp : UnaryOp ("cos") {
-    override fun op(a: Int): Expression = op (a)
+    override fun op(a: Long): Expression = op (a)
     override fun op(a: Double): Expression = DoubleValue (Math.cos (a))
 }
 
@@ -279,7 +278,7 @@ class SqrtOp: InvokableSupport ("sqrt") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 1)[0]
         return when (eval) {
-            is IntValue -> DoubleValue (Math.sqrt (eval.value.toDouble ()))
+            is LongValue -> DoubleValue (Math.sqrt (eval.value.toDouble ()))
             is DoubleValue -> DoubleValue (Math.sqrt (eval.value))
             else -> throw IllegalArgumentException ("Invalid type: ${eval::class.simpleName} of ${cell.car}")
         }
@@ -290,7 +289,7 @@ class FloorOp: InvokableSupport ("floor") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
-            is IntValue -> IntValue (Math.floor (arg.value.toDouble()).toInt())
+            is LongValue -> LongValue (Math.floor (arg.value.toDouble()).toLong ())
             is DoubleValue -> DoubleValue (Math.floor (arg.value))
             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
@@ -301,7 +300,7 @@ class CeilOp: InvokableSupport ("ceil") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
-            is IntValue -> IntValue (Math.ceil (arg.value.toDouble()).toInt ())
+            is LongValue -> LongValue (Math.ceil (arg.value.toDouble ()).toLong())
             is DoubleValue -> DoubleValue (Math.ceil (arg.value))
             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
@@ -312,8 +311,8 @@ class RoundOp: InvokableSupport ("round") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
-            is IntValue -> IntValue (Math.round (arg.value.toDouble ()).toInt ()) // to long
-            is DoubleValue -> DoubleValue (Math.round (arg.value).toDouble ())// to long
+            is LongValue -> LongValue (Math.round (arg.value.toDouble ()).toLong  ())
+            is DoubleValue -> LongValue (Math.round (arg.value).toLong ())
              else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
     }
@@ -323,8 +322,8 @@ class IntOp: InvokableSupport ("->int") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
-            is IntValue -> arg
-            is DoubleValue -> IntValue (arg.value.toInt ())
+            is LongValue -> arg
+            is DoubleValue -> LongValue (arg.value.toLong ())
             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }
     }
@@ -334,7 +333,7 @@ class DoubleOp: InvokableSupport ("->double") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val arg = evalList (cell, interp, 1)[0]
         return when (arg) {
-            is IntValue -> DoubleValue (arg.value.toDouble())
+            is LongValue -> DoubleValue (arg.value.toDouble())
             is DoubleValue -> arg
             else -> throw IllegalArgumentException ("Invalid type: ${arg::class.simpleName} of ${cell.car}")
         }

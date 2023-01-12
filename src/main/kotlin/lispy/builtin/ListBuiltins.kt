@@ -179,12 +179,12 @@ class AppendOp: InvokableSupport ("append") {
  */
 
 class ListTailOp : InvokableSupport("list-tail") {
-    override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
+    override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 2)
         val (list, index) = eval
         val sublist = buildList {
             val els = list.asPair.toList ()
-            addAll (els.subList (index.asInt.value, els.size))
+            addAll (els.subList (index.asLong.value.toInt (), els.size))
         }
         return ConsPair.fromList (sublist)
     }
@@ -194,7 +194,7 @@ class ListRefOp: InvokableSupport ("list-ref") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 2)
         val (list, index) = eval
-        return list.asPair.toList ()[index.asInt.value]
+        return list.asPair.toList ()[index.asLong.value.toInt ()]
     }
 
 }

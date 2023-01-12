@@ -57,10 +57,10 @@ fun main() {
 
     run {
         println ("CYCLIC")
-        val a = ConsPair (IntValue (1), NilValue)
-        val b = ConsPair (IntValue (2), a)
-        val c = ConsPair (IntValue (3), b)
-        val d = ConsPair (IntValue (4), c)
+        val a = ConsPair (LongValue (1), NilValue)
+        val b = ConsPair (LongValue (2), a)
+        val c = ConsPair (LongValue (3), b)
+        val d = ConsPair (LongValue (4), c)
 //        a.cdr = d
 //        show (d)
 

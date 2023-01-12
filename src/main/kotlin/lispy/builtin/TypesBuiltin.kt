@@ -59,7 +59,7 @@ class IsProcedureOp: InvokableSupport ("procedure?") {
 class IsNumberOp: InvokableSupport ("number?") {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val eval = evalList (cell, interp, 1)[0]
-        return BooleanValue (eval is IntValue || eval is DoubleValue)
+        return BooleanValue (eval is LongValue || eval is DoubleValue)
     }
 }
 
@@ -96,7 +96,7 @@ class TypeOfOp : InvokableSupport ("typeof?") {
             NilValue -> "nil"
             is BooleanValue -> "boolean"
             is StringValue -> "string"
-            is IntValue,
+            is LongValue,
             is DoubleValue -> "number"
             is Symbol -> "symbol"
             is ConsPair -> "pair"

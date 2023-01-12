@@ -1,10 +1,10 @@
 package lispy.test
 
 import lispy.ConsPair
-import lispy.IntValue
+import lispy.LongValue
 
 fun main() {
-    val cell = ConsPair (IntValue (1))
+    val cell = ConsPair (LongValue (1))
     cell.cdr = cell
     println (System.identityHashCode (cell))
     println (cell.hashCode ())

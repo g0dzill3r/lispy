@@ -37,7 +37,7 @@ class LexerLixy : Lexer {
             TokenType.DOT -> Token.Dot(loc)
             TokenType.QUOTE -> Token.Quote(loc)
             TokenType.SYMBOL -> Token.Symbol(ltoken.string, loc)
-            TokenType.INT -> Token.Integer(ltoken.string.toInt(), loc)
+            TokenType.INT -> Token.Long(ltoken.string.toLong (), loc)
             TokenType.DOUBlE -> Token.Double (ltoken.string.toDouble (), loc)
             TokenType.QUOTED_STRING -> Token.QuotedString(ltoken.string, loc)
             else -> throw IllegalStateException("Unexpected token type: ${ltoken.tokenType}")

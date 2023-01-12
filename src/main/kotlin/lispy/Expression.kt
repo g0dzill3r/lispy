@@ -21,9 +21,9 @@ abstract class Expression {
             return this
         }
 
-    val asInt: IntValue
+    val asLong: LongValue
         get () {
-            if (this !is IntValue) {
+            if (this !is LongValue) {
                 throw IllegalArgumentException ("Not an int: $this")
             }
             return this
@@ -191,10 +191,10 @@ abstract class Value : Expression ()
 object NilValue : Value () {
     override fun toString (): String = "nil"
 }
-data class IntValue (val value: Int) : Value () {
+data class LongValue (val value: Long) : Value () {
     override fun toString (): String = "$value"
 }
-data class DoubleValue(val value: Double) : Value () {
+data class DoubleValue (val value: Double) : Value () {
     override fun toString (): String = "$value"
 }
 data class StringValue (val value: String): Value () {

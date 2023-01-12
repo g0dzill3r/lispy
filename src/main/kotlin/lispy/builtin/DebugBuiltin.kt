@@ -13,7 +13,8 @@ private val DEBUG_BUILTINS = listOf (
     FormatOp::class,
     StackOp::class,
     RuntimeOp::class,
-    ErrorOp::class
+    ErrorOp::class,
+    NowOp::class
 )
 
 
@@ -78,7 +79,7 @@ class FormatOp: InvokableSupport ("format") {
         val args = eval.subList(1, eval.size).map {
             when (it) {
                 is DoubleValue -> it.value
-                is IntValue -> it.value
+                is LongValue -> it.value
                 is StringValue -> it.value
                 is BooleanValue -> it.value
                 is Symbol -> it.symbol
@@ -129,8 +130,12 @@ class StackOp : InvokableSupport ("stack?") {
     }
 }
 
+class NowOp : InvokableSupport ("now") {
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = LongValue (System.currentTimeMillis())
+}
+
 class RuntimeOp: InvokableSupport ("runtime") {
-    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = IntValue ((System.currentTimeMillis() - interp.startTime).toInt ())
+    override fun invoke(cell: ConsPair, interp: Interpreter): Expression = LongValue (System.currentTimeMillis() - interp.startTime)
 }
 
 class ErrorOp: InvokableSupport ("error") {

@@ -51,7 +51,7 @@ class InternalParser (val lexer: Lexer) : Parser {
         val next = iter.next ()
         return when (next) {
             is Token.Nil -> ConsPair.NIL
-            is Token.Integer -> IntValue (next.value)
+            is Token.Long -> LongValue (next.value)
             is Token.Double -> DoubleValue (next.value)
             is Token.Bool -> BooleanValue (next.value)
             is Token.Symbol -> Symbol (next.symbol)

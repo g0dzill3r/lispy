@@ -7,7 +7,7 @@ import lispy.internal.Source
  */
 
 sealed class Token (val location: Source.Location) {
-    class Integer (val value: Int, loc: Source.Location) : Token (loc) {
+    class Long(val value: kotlin.Long, loc: Source.Location) : Token (loc) {
         override fun toString() : String = "int:$value"
     }
     class Double (val value: kotlin.Double, loc: Source.Location): Token (loc) {
@@ -57,7 +57,7 @@ sealed class Token (val location: Source.Location) {
                 is Bool -> if (token.value) "#t" else "#f"
                 is Symbol -> token.symbol
                 is QuotedString -> "\"${token.string}\""
-                is Integer -> "${token.value}"
+                is Long -> "${token.value}"
                 is Double -> "${token.value}"
                 is Quote -> "\'"
                 is Quasiquote -> "\\`"

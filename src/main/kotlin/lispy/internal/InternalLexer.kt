@@ -97,7 +97,7 @@ class InternalLexer : Lexer {
         return if (isFloat) {
             Token.Double (buf.toString().toDouble (), source.location)
         } else {
-            Token.Integer (buf.toString().toInt(), source.location)
+            Token.Long (buf.toString().toLong (), source.location)
         }
     }
 
