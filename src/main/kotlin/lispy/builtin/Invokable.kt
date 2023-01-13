@@ -57,6 +57,7 @@ abstract class InvokableSupport (override val symbol: String) : Invokable, Expre
         }
         return expr
     }
+
     fun requirePair (expr: Expression) : ConsPair {
         if (expr !is ConsPair) {
             throw IllegalArgumentException ("Not an expression cell: $expr")

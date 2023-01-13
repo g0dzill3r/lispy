@@ -63,6 +63,7 @@ abstract class Expression {
 }
 
 class ConsPair (var car: Expression, var cdr: Expression = NilValue) : Expression () {
+
     val last: ConsPair
         get () {
             var ptr = this
@@ -94,7 +95,7 @@ class ConsPair (var car: Expression, var cdr: Expression = NilValue) : Expressio
             NIL -> Unit
             is NilValue -> Unit
             is ConsPair -> (cdr as ConsPair).toList (list)
-            else -> throw IllegalStateException ("Malformed list: $cdr")
+            else -> throw IllegalStateException ("Not a list: $cdr")
         }
         return list
     }

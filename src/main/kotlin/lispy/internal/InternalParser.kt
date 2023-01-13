@@ -55,11 +55,11 @@ class InternalParser (val lexer: Lexer) : Parser {
             is Token.Double -> DoubleValue (next.value)
             is Token.Bool -> BooleanValue (next.value)
             is Token.Symbol -> Symbol (next.symbol)
-            is Token.Unquote -> ConsPair (Symbol (UnquoteOp.UNQUOTE), ConsPair (parseExpression (iter)))
-            is Token.Quasiquote -> ConsPair (Symbol (QuasiquoteOp.QUASIQUOTE), ConsPair (parseExpression (iter)))
+            is Token.Unquote -> UnquoteOp.unquote (parseExpression (iter))
+            is Token.Quote -> QuoteOp.quote (parseExpression (iter))
+            is Token.Quasiquote -> QuasiquoteOp.quasiquote (parseExpression (iter))
             is Token.QuotedString -> StringValue (next.string)
-            is Token.Quote -> ConsPair(Symbol (QuoteOp.QUOTE), ConsPair (parseExpression (iter)))
-            is Token.UnquoteSplicing -> ConsPair (Symbol (UnquoteSplicingOp.UNQUOTE_SPLICING), ConsPair (parseExpression (iter)))
+            is Token.UnquoteSplicing -> UnquoteSplicingOp.unquote (parseExpression (iter))
             is Token.LeftParen -> {
                 if (iter.peek () is Token.RightParen) {
                     iter.next ()

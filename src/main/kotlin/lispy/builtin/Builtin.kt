@@ -34,8 +34,8 @@ class QuoteOp : InvokableSupport (QUOTE) {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression = cell.car as Expression
 
     companion object {
-        val QUOTE = "quote"
-        fun quote (expression: Expression) = ConsPair (Symbol ("quote"), ConsPair (expression))
+        const val QUOTE = "quote"
+        fun quote (expression: Expression) = ConsPair (Symbol (QUOTE), ConsPair (expression))
     }
 }
 
@@ -45,7 +45,8 @@ class UnquoteOp: InvokableSupport (UNQUOTE) {
         return interp.eval (arg)
     }
     companion object {
-        val UNQUOTE = "unquote"
+        const val UNQUOTE = "unquote"
+        fun unquote (expression: Expression) = ConsPair (Symbol (UNQUOTE), ConsPair (expression))
     }
 }
 
@@ -55,7 +56,8 @@ class UnquoteSplicingOp: InvokableSupport (UNQUOTE_SPLICING) {
         return interp.eval (arg)
     }
     companion object {
-        val UNQUOTE_SPLICING = "unquote-splicing"
+        const val UNQUOTE_SPLICING = "unquote-splicing"
+        fun unquote (expression: Expression) = ConsPair (Symbol (UNQUOTE_SPLICING), ConsPair (expression))
     }
 }
 
@@ -110,11 +112,12 @@ class QuasiquoteOp : InvokableSupport (QUASIQUOTE) {
         }
     }
     companion object {
-        val QUASIQUOTE = "quasiquote"
+        const val QUASIQUOTE = "quasiquote"
+        fun quasiquote (expression: Expression) = ConsPair (Symbol (QUASIQUOTE), ConsPair (expression))
     }
 }
 
-class DisplayOp: InvokableSupport ("display") {
+class DisplayOp: InvokableSupport (DISPLAY) {
     override fun invoke(cell: ConsPair, interp: Interpreter): Expression {
         val list = evalList (cell, interp)
         list.forEachIndexed { i, el ->
@@ -124,6 +127,10 @@ class DisplayOp: InvokableSupport ("display") {
             interp.buffer.append (el)
         }
         return NilValue
+    }
+
+    companion object {
+        const val DISPLAY = "display"
     }
 }
 
@@ -135,7 +142,7 @@ class NewlineOp : InvokableSupport (NEWLINE) {
     }
 
     companion object {
-        val NEWLINE = "newline"
+        const val NEWLINE = "newline"
     }
 }
 
@@ -143,17 +150,22 @@ class NoopOp : InvokableSupport(NOOP) {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression = NilValue
 
     companion object {
-        val NOOP = "noop"
+        const val NOOP = "noop"
     }
 
 }
 
 class DumpOp : InvokableSupport ("dump") {
     override fun invoke (cell: ConsPair, interp: Interpreter): Expression {
-        println ("CELL - $cell")
         val eval = interp.eval (cell)
-        println (eval)
+        println ("CELL - $cell")
+        println ("DOTTED - ${cell.toDottedString()}")
+        println ("EVAL - $eval")
         return eval
+    }
+
+    companion object {
+        const val DUMP = "dump"
     }
 }
 

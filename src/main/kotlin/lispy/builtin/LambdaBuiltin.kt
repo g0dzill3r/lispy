@@ -264,8 +264,7 @@ class EvalOp : InvokableSupport ("eval") {
         if (cell.length != 1) {
             throw IllegalArgumentException ("Expected 1 argument found ${cell.length} in ${cell}")
         }
-        val expr = requirePair (cell.car)
-        return interp.eval (interp.eval (expr))
+        return interp.eval (interp.eval (cell.car))
     }
 }
 
